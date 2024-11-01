@@ -24,13 +24,12 @@ startButton.addEventListener('click', () => {
 
 // Обработчик нажатия на кнопку "Да"
 yesButton.addEventListener('click', () => {
-    alert('Вы выбрали: Да');
-    // Здесь можно добавить логику для начала теста
+    // Переход на страницу в папке question1
+    window.location.href = './question1/index.html';
 });
 
 // Обработчик нажатия на кнопку "Нет"
 noButton.addEventListener('click', () => {
-    alert('Вы выбрали: Нет');
-    // Здесь можно добавить логику для отмены теста
-    switchScreen(questionScreen, mainScreen); // Возвращение на начальный экран
+    // Плавное возвращение к начальному экрану
+    switchScreen(questionScreen, mainScreen);
 });
