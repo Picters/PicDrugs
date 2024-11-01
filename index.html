@@ -3,27 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простая Анимация Кнопки</title>
+    <title>Pic</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- Заголовок -->
-    <h1>Простая Анимация Кнопки</h1>
-
-    <!-- Кнопка "Генератор" -->
-    <div class="button-container">
-        <button class="generator-button" id="generatorButton" onclick="transformButton()">Генератор</button>
+    <div class="container" id="mainScreen">
+        <h1>Pic</h1>
+        <button id="startButton">Начать тест</button>
     </div>
 
-    <!-- Скрытые кнопки, которые появятся после трансформации -->
-    <div class="hidden-buttons" id="buttonContainer">
-        <button class="transform-button" onclick="generate('Пароль')">Пароль</button>
-        <button class="transform-button" onclick="generate('Никнейм')">Никнейм</button>
-        <button class="transform-button" onclick="generate('Номер')">Номер</button>
+    <div class="container" id="questionScreen" style="display: none;">
+        <h2>Вы уверены?</h2>
+        <button id="yesButton">Да</button>
+        <button id="noButton">Нет</button>
     </div>
 
-    <!-- Подключение JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
