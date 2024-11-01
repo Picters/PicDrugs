@@ -7,25 +7,88 @@ body {
     height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
 }
 
 /* Стиль заголовка */
 h1 {
-    font-size: 2em;
-    margin-bottom: 20px;
+    font-size: 3em;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: bold;
 }
 
-/* Стиль кнопок */
-.generator-button, .hidden-buttons button {
-    padding: 10px 20px;
-    font-size: 1.2em;
-    margin: 10px;
+/* Начальный стиль кнопки "Генератор" */
+.generator-button {
+    padding: 15px 30px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 50px;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    transform: scale(1);
+}
+
+/* Эффект при наведении на кнопку "Генератор" */
+.generator-button:hover {
+    background-color: #45a049;
+    transform: scale(1.1);
 }
 
 /* Контейнер для скрытых кнопок */
 .hidden-buttons {
-    display: none;
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    gap: 20px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* Стиль для появления кнопок */
+.hidden-buttons.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Стиль для каждой отдельной кнопки */
+.hidden-buttons button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Эффект при наведении на каждую из новых кнопок */
+.hidden-buttons button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Анимация расширения для кнопки "Генератор" */
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.generator-button.expand {
+    width: 250px;
+    border-radius: 15px;
+    opacity: 0;
+    transition: width 0.5s ease, border-radius 0.5s ease, opacity 0.5s ease;
 }

@@ -11,10 +11,12 @@
     <!-- Название сайта -->
     <h1>Pic</h1>
 
-    <!-- Кнопка Generator -->
-    <button class="generator-button" onclick="showButtons()">Generator</button>
+    <!-- Кнопка "Генератор", которая станет тремя кнопками -->
+    <div class="button-container">
+        <button class="generator-button" id="generatorButton" onclick="transformButton()">Генератор</button>
+    </div>
 
-    <!-- Скрытые кнопки, которые появятся после нажатия Generator -->
+    <!-- Скрытые кнопки, которые появятся после трансформации -->
     <div class="hidden-buttons" id="buttonContainer">
         <button onclick="generate('Пароль')">Пароль</button>
         <button onclick="generate('Никнейм')">Никнейм</button>
