@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pic</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Название сайта -->
+    <h1>Pic</h1>
+
+    <!-- Кнопка Generator -->
+    <button class="generator-button" onclick="showButtons()">Generator</button>
+
+    <!-- Скрытые кнопки, которые появятся после нажатия Generator -->
+    <div class="hidden-buttons" id="buttonContainer">
+        <button onclick="generate('Пароль')">Пароль</button>
+        <button onclick="generate('Никнейм')">Никнейм</button>
+        <button onclick="generate('Номер')">Номер</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
