@@ -8,52 +8,44 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
-    overflow: hidden;
 }
 
 /* Заголовок */
 h1 {
-    font-size: 3em;
+    font-size: 2em;
     color: #333;
-    margin-bottom: 30px;
-    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 /* Стиль кнопки "Генератор" */
 .generator-button {
     padding: 15px 30px;
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: bold;
     color: #fff;
     background-color: #4CAF50;
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
     transition: all 0.4s ease;
 }
 
-/* Canvas для анимации фона */
-#backgroundCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+/* Эффект при наведении на кнопку "Генератор" */
+.generator-button:hover {
+    background-color: #45a049;
+    transform: scale(1.1);
 }
 
-/* Скрытые кнопки */
+/* Контейнер для скрытых кнопок */
 .hidden-buttons {
     display: flex;
-    gap: 20px;
+    gap: 15px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.6s ease;
 }
 
-/* Кнопки после разделения */
+/* Кнопки после трансформации */
 .transform-button {
     padding: 10px 20px;
     font-size: 1.2em;
@@ -65,4 +57,9 @@ h1 {
     cursor: pointer;
     transform: scale(0);
     transition: transform 0.3s ease;
+}
+
+/* Анимация появления кнопок после трансформации */
+.transform-button.visible {
+    transform: scale(1);
 }
