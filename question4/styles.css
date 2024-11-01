@@ -12,13 +12,9 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #000000; /* Черный фон */
+    color: #f0f0f0;
     transition: background-color 0.5s, color 0.5s;
 }
-
-    body.dark-theme {
-        background-color: #000000; /* Черный фон для темной темы */
-        color: #f0f0f0;
-    }
 
 .container {
     text-align: center;
@@ -26,11 +22,10 @@ body {
 
 h2 {
     font-size: 2rem;
-    color: inherit;
     margin-bottom: 20px;
 }
 
-/* Быстро мигающий красный текст "Обернись" */
+/* Красный мигающий текст "Обернись" */
 .scare {
     color: red;
     font-size: 3rem;
@@ -38,7 +33,6 @@ h2 {
     animation: fast-flicker 0.1s infinite alternate;
 }
 
-/* Быстрая анимация для мигания текста */
 @keyframes fast-flicker {
     0% {
         opacity: 1;
@@ -80,7 +74,6 @@ button {
         background-color: #8b0000;
     }
 
-/* Темные стили кнопок */
 body.dark-theme .yes {
     background-color: #4caf50;
 }

@@ -3,21 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pic</title>
+    <title>Вопрос 5</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container" id="mainScreen">
-        <h1>Pic</h1>
-        <button id="startButton">Начать тест</button>
-    </div>
-
-    <div class="container" id="questionScreen" style="display: none;">
-        <h2>Вы уверены?</h2>
-        <button id="yesButton">Да</button>
-        <button id="noButton">Нет</button>
+    <div class="container" id="content">
+        <h2>Введи код:</h2>
+        <input type="text" id="codeInput" placeholder="Введите код" />
+        <button id="submitButton">Отправить</button>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Отключение кнопок "Назад" в браузере на всех страницах
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, location.href);
+        });
+
+        // Проверка на darkMode и добавление темной темы
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
 </body>
 </html>
