@@ -1,0 +1,98 @@
+/* Сброс стилей для совместимости */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #000000; /* Черный фон */
+    transition: background-color 0.5s, color 0.5s;
+}
+
+    body.dark-theme {
+        background-color: #000000; /* Черный фон для темной темы */
+        color: #f0f0f0;
+    }
+
+.container {
+    text-align: center;
+}
+
+h2 {
+    font-size: 2rem;
+    color: inherit;
+    margin-bottom: 20px;
+}
+
+/* Быстро мигающий красный текст "Обернись" */
+.scare {
+    color: red;
+    font-size: 3rem;
+    font-weight: bold;
+    animation: fast-flicker 0.1s infinite alternate;
+}
+
+/* Быстрая анимация для мигания текста */
+@keyframes fast-flicker {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+button {
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.yes {
+    background-color: green;
+}
+
+    .yes:hover {
+        background-color: #006400;
+    }
+
+.no {
+    background-color: red;
+}
+
+    .no:hover {
+        background-color: #8b0000;
+    }
+
+/* Темные стили кнопок */
+body.dark-theme .yes {
+    background-color: #4caf50;
+}
+
+    body.dark-theme .yes:hover {
+        background-color: #357a38;
+    }
+
+body.dark-theme .no {
+    background-color: #d32f2f;
+}
+
+    body.dark-theme .no:hover {
+        background-color: #9a0007;
+    }

@@ -1,0 +1,52 @@
+/* Сброс стилей для совместимости */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+button {
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.yes {
+    background-color: green;
+}
+
+    .yes:hover {
+        background-color: #006400;
+    }
+
+.no {
+    background-color: red;
+}
+
+    .no:hover {
+        background-color: #8b0000;
+    }
