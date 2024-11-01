@@ -3,26 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pic</title>
+    <title>Advanced Animations</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Заголовок -->
+    <h1>Advanced Animations</h1>
 
-    <!-- Название сайта -->
-    <h1>Pic</h1>
-
-    <!-- Кнопка "Генератор", которая станет тремя кнопками -->
+    <!-- Кнопка "Генератор" -->
     <div class="button-container">
         <button class="generator-button" id="generatorButton" onclick="transformButton()">Генератор</button>
     </div>
 
+    <!-- Canvas для анимации фона -->
+    <canvas id="backgroundCanvas"></canvas>
+
     <!-- Скрытые кнопки, которые появятся после трансформации -->
     <div class="hidden-buttons" id="buttonContainer">
-        <button onclick="generate('Пароль')">Пароль</button>
-        <button onclick="generate('Никнейм')">Никнейм</button>
-        <button onclick="generate('Номер')">Номер</button>
+        <button class="transform-button" onclick="generate('Пароль')">Пароль</button>
+        <button class="transform-button" onclick="generate('Никнейм')">Никнейм</button>
+        <button class="transform-button" onclick="generate('Номер')">Номер</button>
     </div>
 
+    <!-- Контейнер для Lottie-анимации -->
+    <div id="lottieContainer"></div>
+
+    <!-- Подключение скриптов -->
+    <script src="three.min.js"></script>
+    <script src="gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
