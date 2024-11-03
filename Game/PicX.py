@@ -9,9 +9,13 @@ class GameApp:
         # Инициализация pygame для воспроизведения музыки и звуков
         pygame.mixer.init()
         
-        # Загрузка звука клика
+        # Загрузка звуков
         self.click_sound = pygame.mixer.Sound("./data/game/click.mp3")
-        self.click_sound.set_volume(1.0)  # Установка громкости на 100%
+        self.click_sound.set_volume(1.0)  # Громкость клика на 100%
+        
+        # Загрузка музыки для главного меню и игры
+        self.menu_music_file = "./data/main/music.mp3"
+        self.game_music_file = "./data/game/X.mp3"
         
         # Установка только полноэкранного режима
         self.root.attributes("-fullscreen", True)
@@ -28,20 +32,32 @@ class GameApp:
         self.root.bind("<Escape>", self.start_escape_countdown)
         self.root.bind("<KeyRelease-Escape>", self.stop_escape_countdown)
         
-        # Привязка события клика мыши для воспроизведения звука
-        self.root.bind("<Button-1>", self.play_click_sound)
-        
         # Создаем главное меню
         self.main_menu()
 
-    def play_click_sound(self, event=None):
-        # Воспроизведение звука клика
+    def play_click_sound(self):
+        # Воспроизведение звука клика при нажатии на кнопку
         self.click_sound.play()
+
+    def play_menu_music(self):
+        # Воспроизведение фоновой музыки для главного меню с громкостью 10%
+        pygame.mixer.music.load(self.menu_music_file)
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(loops=-1)
+
+    def play_game_music(self):
+        # Воспроизведение фоновой музыки для игры с громкостью 3%
+        pygame.mixer.music.load(self.game_music_file)
+        pygame.mixer.music.set_volume(0.03)
+        pygame.mixer.music.play(loops=-1)
 
     def main_menu(self):
         # Очистка окна
         for widget in self.root.winfo_children():
             widget.destroy()
+        
+        # Воспроизведение музыки для главного меню
+        self.play_menu_music()
         
         # Рамка для центровки контента
         frame = tk.Frame(self.root, bg="black")
@@ -57,7 +73,7 @@ class GameApp:
         # Кнопка "Играть"
         play_button = tk.Button(
             frame, text="Играть", font=("Helvetica", 18),
-            command=self.start_loading_screen,
+            command=lambda: [self.play_click_sound(), self.start_loading_screen()],
             bg="#4CAF50", fg="white", activebackground="#388E3C",
             activeforeground="white", width=20, height=2
         )
@@ -66,7 +82,7 @@ class GameApp:
         # Кнопка "Выйти"
         exit_button = tk.Button(
             frame, text="Выйти", font=("Helvetica", 18),
-            command=self.exit_game,
+            command=lambda: [self.play_click_sound(), self.exit_game()],
             bg="#E53935", fg="white", activebackground="#B71C1C",
             activeforeground="white", width=20, height=2
         )
@@ -85,10 +101,12 @@ class GameApp:
         self.root.after(5000, self.start_game)
     
     def start_game(self):
+        # Переключение на музыку игры
+        self.play_game_music()
         # Начало первого вопроса
-        self.ask_question("Начать тест?", "ДА", "НЕТ", self.ask_question_2)
+        self.ask_question("Начать тест?", "ДА", "НЕТ", self.ask_question_2, exit_on_no=True)
     
-    def ask_question(self, question, option1, option2, next_question_callback):
+    def ask_question(self, question, option1, option2, next_question_callback, exit_on_no=False):
         # Очистка окна
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -101,11 +119,14 @@ class GameApp:
         question_label = tk.Label(frame, text=f"{question}\n\n1. {option1}\n2. {option2}", font=("Courier", 18), fg="white", bg="black")
         question_label.pack(pady=20)
         
-        # Поле для ввода ответа
+        # Поле для ввода ответа с ограничением на один символ
         self.input_var = tk.StringVar()
         input_entry = tk.Entry(frame, textvariable=self.input_var, font=("Courier", 18), fg="white", bg="black", insertbackground="white", width=2)
         input_entry.pack(pady=20)
         input_entry.focus()
+        
+        # Ограничение ввода на один символ
+        input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry))
         
         # Мигающая полоска в поле ввода
         self.blink_cursor(input_entry)
@@ -113,23 +134,30 @@ class GameApp:
         # Кнопка для подтверждения ответа
         submit_button = tk.Button(
             frame, text="ОК", font=("Helvetica", 18),
-            command=lambda: self.process_answer(option1, option2, next_question_callback)
+            command=lambda: [self.play_click_sound(), self.process_answer(option1, option2, next_question_callback, exit_on_no)]
         )
         submit_button.pack(pady=10)
-    
-    def process_answer(self, option1, option2, next_question_callback):
+
+    def limit_input_length(self, entry):
+        # Ограничение ввода на один символ
+        if len(entry.get()) > 1:
+            entry.delete(1, tk.END)
+
+    def process_answer(self, option1, option2, next_question_callback, exit_on_no):
         answer = self.input_var.get()
         
         # Проверка ответа
         if answer == "1":
             self.show_transition(next_question_callback)
         elif answer == "2":
-            if option2 == "НЕТ" and next_question_callback == self.end_game_screen:
+            if exit_on_no:
+                self.exit_game()  # Завершаем игру, если "НЕТ" в первом вопросе
+            elif option2 == "НЕТ" and next_question_callback == self.end_game_screen:
                 self.ask_question("Хочешь поиграть?", "ДА", "НЕТ", self.end_game_screen)
             else:
                 self.show_transition(next_question_callback)
         else:
-            self.show_error_screen(lambda: self.ask_question("Начать тест?", "ДА", "НЕТ", self.ask_question_2))
+            self.show_error_screen(lambda: self.ask_question("Начать тест?", "ДА", "НЕТ", self.ask_question_2, exit_on_no=True))
     
     def show_error_screen(self, retry_callback):
         # Очистка окна и показ сообщения об ошибке
@@ -187,9 +215,11 @@ class GameApp:
             self.decrement_escape_counter()
 
     def stop_escape_countdown(self, event):
+        # Сбрасываем состояние удержания при отпускании Escape
         self.escape_pressed = False
         if self.escape_label:
-            self.escape_label.destroy()  # Удаляем обратный отсчет, если клавиша отпущена
+            self.escape_label.destroy()  # Удаляем метку обратного отсчета
+            self.escape_label = None  # Сбрасываем переменную метки
 
     def update_escape_label(self):
         # Обновляем или создаем метку обратного отсчета
