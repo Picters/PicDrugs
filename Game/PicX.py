@@ -16,30 +16,100 @@ class GameApp:
         self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
         self.keypress_sound.set_volume(0.2)  # Громкость звука клавиш на 20%
         
+        # Музыка для главного меню и игры
         self.game_music_file = "./data/game/X.mp3"
+        self.menu_music_file = "./data/main/music.mp3"
         
+        # Настройки окна
         self.root.attributes("-fullscreen", True)
         self.root.configure(bg="black")
-        self.click_enabled = False
         
+        # Переменные для отслеживания состояния
+        self.click_enabled = False
         self.escape_pressed = False
         self.escape_counter = 5
         self.escape_label = None
         
+        # Обработчики клавиш
         self.root.bind("<Escape>", self.start_escape_countdown)
         self.root.bind("<KeyRelease-Escape>", self.stop_escape_countdown)
         
-        self.start_game()  # Начинаем с первых вопросов
+        # Запуск главного меню
+        self.main_menu()
+
+    def play_click_sound(self):
+        if self.click_enabled:
+            self.click_sound.play()
 
     def play_keypress_sound(self):
         self.keypress_sound.play()
 
-    def play_game_music(self):
-        pygame.mixer.music.load(self.game_music_file)
-        pygame.mixer.music.set_volume(0.03)
+    def play_menu_music(self):
+        pygame.mixer.music.load(self.menu_music_file)
+        pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(loops=-1)
 
+    def stop_menu_music(self):
+        pygame.mixer.music.stop()
+
+    def play_game_music(self):
+        pygame.mixer.music.load(self.game_music_file)
+        pygame.mixer.music.set_volume(0.03)  # Фоновая музыка на 3% громкости
+        pygame.mixer.music.play(loops=-1)
+
+    def main_menu(self):
+        # Очистка окна и запуск музыки меню
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        self.play_menu_music()
+        
+        # Загрузка фона для главного меню
+        bg_image = Image.open("./data/main/MainBackground.png")
+        self.background_image = ImageTk.PhotoImage(bg_image)
+        background_label = tk.Label(self.root, image=self.background_image)
+        background_label.place(relwidth=1, relheight=1)
+        
+        # Название игры
+        title_label = tk.Label(
+            self.root, text="PicX", font=("Helvetica", 48, "bold"),
+            fg="white", bg="black"
+        )
+        title_label.pack(pady=60)
+
+        # Стили кнопок
+        button_style = {
+            "font": ("Helvetica", 18, "bold"),
+            "fg": "#000000",
+            "bg": "#ffffff",
+            "activebackground": "#354251",
+            "activeforeground": "#0095ff",
+            "bd": 4,
+            "relief": "solid",
+            "width": 20,
+            "height": 2,
+            "cursor": "hand2"
+        }
+        
+        # Кнопка "Играть"
+        play_button = tk.Button(
+            self.root, text="Играть", command=lambda: [self.play_click_sound(), self.start_game()],
+            **button_style
+        )
+        play_button.pack(pady=15)
+
+        # Кнопка "Выйти"
+        exit_button = tk.Button(
+            self.root, text="Выйти", command=lambda: [self.play_click_sound(), self.exit_game()],
+            **button_style
+        )
+        exit_button.pack(pady=15)
+
     def start_game(self):
+        # Остановка музыки меню и запуск фона для игры
+        self.stop_menu_music()
+        self.play_game_music()
+        self.click_enabled = True
         self.ask_question("Начать тест?", "ДА", "НЕТ", self.ask_question_2, exit_on_no=True)
 
     def ask_question(self, question, option1, option2, next_question_callback, exit_on_no=False):
@@ -60,6 +130,9 @@ class GameApp:
         input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry))
         input_entry.bind("<Key>", lambda event: self.play_keypress_sound())
         
+        # Обработка нажатия клавиши Enter
+        input_entry.bind("<Return>", lambda event: self.process_answer(option1, option2, next_question_callback, exit_on_no))
+        
         submit_button = tk.Button(
             frame, text="ОК", font=("Helvetica", 18),
             command=lambda: self.process_answer(option1, option2, next_question_callback, exit_on_no)
@@ -77,10 +150,11 @@ class GameApp:
             self.show_transition(next_question_callback)
         elif answer == "2":
             if exit_on_no:
-                self.exit_game()  # Завершаем игру, если "НЕТ" в первом вопросе
+                self.exit_game()
             else:
                 self.show_transition(next_question_callback)
         else:
+            # Вывод сообщения об ошибке, если ввод некорректен
             self.show_error_screen(lambda: self.ask_question(question, option1, option2, next_question_callback, exit_on_no))
 
     def show_transition(self, next_question_callback):
@@ -96,7 +170,7 @@ class GameApp:
         error_label = tk.Label(self.root, text="...", font=("Helvetica", 48), fg="white", bg="black")
         error_label.pack(expand=True)
         
-        self.root.after(5000, retry_callback)
+        self.root.after(3000, retry_callback)
 
     def ask_question_2(self):
         self.ask_question("Вы одни?", "ДА", "НЕТ", self.ask_question_3)
@@ -107,7 +181,6 @@ class GameApp:
     def ask_question_4(self):
         self.ask_question("Спас бы семью если бы она была в опасности?", "ДА", "НЕТ", self.start_end_sequence)
 
-    # Финальная последовательность
     def start_end_sequence(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -150,28 +223,32 @@ class GameApp:
         input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry))
         input_entry.bind("<Key>", lambda event: self.play_keypress_sound())
         
+        # Обработка нажатия клавиши Enter
+        input_entry.bind("<Return>", lambda event: self.process_ready_answer())
+        
         submit_button = tk.Button(
             self.root, text="ОК", font=("Helvetica", 18),
-            command=lambda: self.process_ready_answer()
+            command=self.process_ready_answer
         )
         submit_button.pack(pady=10)
 
     def process_ready_answer(self):
         answer = self.input_var.get()
         
-        if answer == "1":  # ДА
+        if answer == "1":
             self.start_black_screen_with_sound()
-        elif answer == "2":  # НЕТ
-            self.show_dots_and_exit()
+        elif answer == "2":
+            self.show_dots_and_black_screen()  # Изменено на черный экран вместо выхода
 
-    def show_dots_and_exit(self):
+    def show_dots_and_black_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
         
         dots_label = tk.Label(self.root, text="...", font=("Courier", 48), fg="white", bg="black")
         dots_label.pack(expand=True)
         
-        self.root.after(3000, self.clear_screen)  # Очищаем экран, но не закрываем игру
+        # Через 3 секунды очищает экран и оставляет его черным
+        self.root.after(3000, self.clear_screen)
 
     def start_black_screen_with_sound(self):
         for widget in self.root.winfo_children():
@@ -192,12 +269,11 @@ class GameApp:
         
         self.increase_sound()
         
-        # Очищаем экран через 500 мс после показа "Хорошо"
         self.root.after(500, self.clear_screen)
 
     def increase_sound(self):
         pygame.mixer.music.load(self.game_music_file)
-        pygame.mixer.music.set_volume(0.01)  # Начальная громкость
+        pygame.mixer.music.set_volume(0.01)
         pygame.mixer.music.play(loops=-1)
         
         for i in range(1, 11):
@@ -206,7 +282,7 @@ class GameApp:
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-        self.root.configure(bg="black")  # Черный экран
+        self.root.configure(bg="black")
 
     def start_escape_countdown(self, event):
         if not self.escape_pressed:
