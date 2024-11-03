@@ -10,9 +10,9 @@ class GameApp:
         # Инициализация pygame для проигрывания музыки
         pygame.mixer.init()
         
-        # Установка окна на полный экран
+        # Установка окна на полный экран и центрирование
         self.fullscreen = True
-        self.root.attributes("-fullscreen", self.fullscreen)
+        self.set_window_size()  # Устанавливаем начальный размер окна и позицию
         
         # Настройка фона
         self.root.configure(bg="black")  # Полностью черный фон
@@ -22,7 +22,24 @@ class GameApp:
         
         # Создаем главное меню
         self.main_menu()
-    
+
+    def set_window_size(self):
+        if self.fullscreen:
+            self.root.attributes("-fullscreen", True)
+        else:
+            self.root.attributes("-fullscreen", False)
+            self.root.geometry("800x600")  # Средний размер окна
+            self.center_window()  # Центрируем окно на экране
+
+    def center_window(self):
+        # Центрирование окна на экране
+        self.root.update_idletasks()
+        width = self.root.winfo_width()
+        height = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+
     def main_menu(self):
         # Очистка окна
         for widget in self.root.winfo_children():
@@ -177,7 +194,7 @@ class GameApp:
     def toggle_fullscreen_key(self, event=None):
         # Переключение полноэкранного режима с помощью клавиши F11
         self.fullscreen = not self.fullscreen
-        self.root.attributes("-fullscreen", self.fullscreen)
+        self.set_window_size()
 
 if __name__ == "__main__":
     root = tk.Tk()
