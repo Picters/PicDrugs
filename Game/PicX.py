@@ -1,6 +1,8 @@
 import tkinter as tk
 import pygame
 import random
+import os
+import sys
 from PIL import Image, ImageTk
 
 class GameApp:
@@ -8,30 +10,38 @@ class GameApp:
         self.root = root
         self.root.title("PicX")
 
+        # Определяем путь к ресурсам
+        if getattr(sys, 'frozen', False):
+            # Если запущено из скомпилированного .exe
+            self.application_path = sys._MEIPASS
+        else:
+            # Если запущено из .py файла
+            self.application_path = os.path.dirname(os.path.abspath(__file__))
+
         pygame.mixer.init()
 
-        # Загрузка звуков
-        self.click_sound = pygame.mixer.Sound("./data/game/click.mp3")
-        self.click_sound.set_volume(1.0)
+        # Удалено: Загрузка звука click.mp3
+        # self.click_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "click.mp3"))
+        # self.click_sound.set_volume(1.0)
 
-        self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
+        self.keypress_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "Keyboard.mp3"))
         self.keypress_sound.set_volume(0.2)
 
         # Звук финальной сцены
-        self.final_scene_sound = pygame.mixer.Sound("./data/game/final_scene.mp3")
+        self.final_scene_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "final_scene.mp3"))
         self.final_scene_sound.set_volume(1.0)
 
         # Звук открытия папки
-        self.open_folder_sound = pygame.mixer.Sound("./data/game/open_folder.mp3")
+        self.open_folder_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "open_folder.mp3"))
         self.open_folder_sound.set_volume(1.0)
 
         # Звук огня
-        self.fire_sound = pygame.mixer.Sound("./data/game/fire.mp3")
+        self.fire_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "fire.mp3"))
         self.fire_sound.set_volume(1.0)
 
         # Музыка для игры и меню
-        self.game_music_file = "./data/game/X.mp3"
-        self.menu_music_file = "./data/main/music.wav"
+        self.game_music_file = os.path.join(self.application_path, "data", "game", "X.mp3")
+        self.menu_music_file = os.path.join(self.application_path, "data", "main", "music.wav")
 
         # Настройки окна
         self.root.attributes("-fullscreen", True)
@@ -50,9 +60,10 @@ class GameApp:
         # Запуск главного меню
         self.main_menu()
 
-    def play_click_sound(self):
-        if self.click_enabled:
-            self.click_sound.play()
+    # Удалено: Метод play_click_sound
+    # def play_click_sound(self):
+    #     if self.click_enabled:
+    #         self.click_sound.play()
 
     def play_keypress_sound(self, char):
         if char.isalpha() or char.isdigit():
@@ -119,10 +130,10 @@ class GameApp:
         answer = self.input_var.get()
 
         if answer == "1":
-            self.play_click_sound()
+            # Удалено: self.play_click_sound()
             self.start_game()
         elif answer == "2":
-            self.play_click_sound()
+            # Удалено: self.play_click_sound()
             self.exit_game()
         else:
             self.show_error_screen(self.main_menu)
@@ -319,7 +330,7 @@ class GameApp:
 
     def show_driver_errors(self):
         # Воспроизвести звук помех
-        glitch_sound = pygame.mixer.Sound("./data/game/glitch.mp3")
+        glitch_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "glitch.mp3"))
         glitch_sound.set_volume(1.0)
         glitch_sound.play()
 
@@ -370,7 +381,7 @@ class GameApp:
         for label in self.error_labels:
             label.destroy()
         # Остановить звук помех
-        pygame.mixer.Sound("./data/game/glitch.mp3").stop()
+        pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "glitch.mp3")).stop()
         # Показать команды восстановления ошибок
         self.show_error_commands()
 
@@ -474,7 +485,7 @@ class GameApp:
             "Launching applications......... Done"
         ]
         # Воспроизвести звук "Repair.mp3"
-        repair_sound = pygame.mixer.Sound("./data/game/Repair.mp3")
+        repair_sound = pygame.mixer.Sound(os.path.join(self.application_path, "data", "game", "Repair.mp3"))
         repair_sound.set_volume(1.0)
         repair_sound.play()
         # Начинаем отображение компонентов
@@ -528,7 +539,7 @@ class GameApp:
         self.final_scene_sound.play()
 
         # Загрузка изображения папки и изменение её размера
-        folder_image = Image.open("./data/game/folder.png")
+        folder_image = Image.open(os.path.join(self.application_path, "data", "game", "folder.png"))
         # Изменяем размер изображения
         folder_image = folder_image.resize((200, 200), Image.LANCZOS)
         folder_photo = ImageTk.PhotoImage(folder_image)
@@ -569,7 +580,7 @@ class GameApp:
         self.secret_label.pack(pady=50)
 
         # Загрузка изображения крестика (закрыть)
-        close_image = Image.open("./data/game/close.png")
+        close_image = Image.open(os.path.join(self.application_path, "data", "game", "close.png"))
         close_image = close_image.resize((30, 30), Image.LANCZOS)
         close_photo = ImageTk.PhotoImage(close_image)
         self.close_button = tk.Label(self.root, image=close_photo, bg="white")
@@ -589,7 +600,7 @@ class GameApp:
 
     def show_folder_again(self):
         # Отображение папки снова
-        folder_image = Image.open("./data/game/folder.png")
+        folder_image = Image.open(os.path.join(self.application_path, "data", "game", "folder.png"))
         folder_image = folder_image.resize((200, 200), Image.LANCZOS)
         folder_photo = ImageTk.PhotoImage(folder_image)
         self.folder_label = tk.Label(self.root, image=folder_photo, bg="white")
@@ -622,7 +633,7 @@ class GameApp:
             widget.destroy()
 
         # Загружаем изображение спичек
-        matches_image = Image.open("./data/game/spichki.png")
+        matches_image = Image.open(os.path.join(self.application_path, "data", "game", "spichki.png"))
         matches_image = matches_image.resize((100, 200), Image.LANCZOS)
         matches_photo = ImageTk.PhotoImage(matches_image)
         self.matches_label = tk.Label(self.root, image=matches_photo, bg="white")
@@ -664,7 +675,7 @@ class GameApp:
         self.fire_sound.play()
 
         # Отображаем изображение огня
-        fire_image = Image.open("./data/game/fire.png")
+        fire_image = Image.open(os.path.join(self.application_path, "data", "game", "fire.png"))
         fire_image = fire_image.resize((200, 200), Image.LANCZOS)
         fire_photo = ImageTk.PhotoImage(fire_image)
         self.fire_label = tk.Label(self.root, image=fire_photo, bg="white")
@@ -680,7 +691,7 @@ class GameApp:
             widget.destroy()
 
         # Загружаем изображение ангела
-        angel_image = Image.open("./data/game/Angel.png")
+        angel_image = Image.open(os.path.join(self.application_path, "data", "game", "Angel.png"))
         angel_image = angel_image.resize((200, 200), Image.LANCZOS)
         angel_photo = ImageTk.PhotoImage(angel_image)
         self.angel_label = tk.Label(self.root, image=angel_photo, bg="white")
@@ -715,8 +726,8 @@ class GameApp:
         if current_y > -200:
             current_y -= 5
             self.angel_label.place(y=current_y)
-            current_alpha = self.angel_label.winfo_fpixels('alpha') - 0.01 if hasattr(self.angel_label, 'alpha') else 1.0
-            self.angel_label.attributes("-alpha", current_alpha)
+            # Эффект исчезновения (не полностью поддерживается в Tkinter)
+            # Можно удалить этот блок, если возникают проблемы
             self.root.after(10, lambda: self.fade_out_angel(current_y))
         else:
             # Закрываем игру через 1 секунду
