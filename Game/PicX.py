@@ -201,10 +201,12 @@ class GameApp:
         if answer == "1":
             self.show_transition(next_question_callback)
         elif answer == "2":
-            if exit_on_no:
+            if exit_on_no:  # Если на первом вопросе "НЕТ", выходим из игры
                 self.exit_game()
+            elif next_question_callback == self.start_end_sequence:
+                self.show_dots_and_exit()  # Показывать три точки при последнем вопросе
             else:
-                self.show_transition(next_question_callback)
+                self.show_transition(next_question_callback)  # Показать следующий вопрос
         else:
             self.show_error_screen(lambda: self.ask_question(self.current_question, option1, option2, next_question_callback, exit_on_no))
 
@@ -212,7 +214,10 @@ class GameApp:
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        self.root.after(3000, next_question_callback)
+        # Отображаем черный экран на 2 секунды
+        black_screen = tk.Frame(self.root, bg="black")
+        black_screen.pack(fill=tk.BOTH, expand=True)
+        self.root.after(2000, next_question_callback)
 
     def show_error_screen(self, retry_callback):
         for widget in self.root.winfo_children():
@@ -227,12 +232,40 @@ class GameApp:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        self.cursor_label = tk.Label(self.root, text="_", font=("Courier", 36), fg="white", bg="black")
-        self.cursor_label.pack(expand=True)
+        # Показ надписи "Хорошо" с громким звуком
+        pygame.mixer.music.set_volume(1.0)
+        final_label = tk.Label(self.root, text="Хорошо", font=("Courier", 36), fg="white", bg="black")
+        final_label.pack(expand=True)
         
-        self.blink_cursor(self.cursor_label)
+        self.root.after(1000, self.fade_out_sound_and_show_black_screen)  # Задержка в 1 секунду
+
+    def fade_out_sound_and_show_black_screen(self):
+        # Плавное уменьшение громкости до нуля
+        for i in range(10):
+            self.root.after(i * 100, lambda v=1 - (i * 0.1): pygame.mixer.music.set_volume(v))
         
-        self.root.after(5000, self.show_ready_prompt)
+        # После затухания звука показать черный экран
+        self.root.after(1000, self.show_black_screen)  # После 1 секунды
+
+    def show_black_screen(self):
+        # Очистка экрана и переход на черный экран
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        black_screen = tk.Frame(self.root, bg="black")
+        black_screen.pack(fill=tk.BOTH, expand=True)
+        
+        # После 2 секунд черный экран показываем мигающую полоску
+        self.root.after(2000, self.show_cursor_effect)
+
+    def show_cursor_effect(self):
+        # Создаем мигающую полоску в верхнем левом углу
+        cursor_label = tk.Label(self.root, text="_", font=("Courier", 48), fg="white", bg="black")
+        cursor_label.place(x=10, y=10)  # Установка положения в верхний левый угол
+        self.blink_cursor(cursor_label)
+
+        # После 5 секунд показываем код подключения
+        self.root.after(5000, self.show_connect_message)
 
     def blink_cursor(self, widget):
         def blink():
@@ -242,100 +275,32 @@ class GameApp:
             widget.after(500, blink)
         blink()
 
-    def show_ready_prompt(self):
-        self.cursor_label.pack_forget()
-        
-        ready_label = tk.Label(self.root, text="Хорошо", font=("Courier", 36), fg="white", bg="black")
-        ready_label.pack()
-        
-        self.root.after(2000, self.ask_ready_question)
-
-    def ask_ready_question(self):
+    def show_connect_message(self):
+        # Очистить экран от предыдущих виджетов
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        question_label = tk.Label(self.root, text="Готов идти дальше?\n\n1. ДА\n2. НЕТ", font=("Courier", 18), fg="white", bg="black")
-        question_label.pack(pady=20)
+        # Сообщение подключения
+        connect_text = "Connect ............ "
+        final_text = "Connected"
         
-        self.input_var = tk.StringVar()
-        input_entry = tk.Entry(self.root, textvariable=self.input_var, font=("Courier", 18), fg="white", bg="black", insertbackground="white", width=2)
-        input_entry.pack(pady=20)
-        input_entry.focus()
+        label = tk.Label(self.root, text="", font=("Courier", 24), fg="white", bg="black")
+        label.pack(expand=True)
         
-        input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry, event))
+        # Начать писать код
+        for i, char in enumerate(connect_text):
+            self.root.after(200 * i, lambda c=char: label.config(text=label.cget("text") + c))
         
-        input_entry.bind("<Return>", lambda event: self.process_ready_answer())
-        
-        submit_button = tk.Button(
-            self.root, text="ОК", font=("Helvetica", 18),
-            command=self.process_ready_answer
-        )
-        submit_button.pack(pady=10)
+        # После завершения показа "Connected"
+        self.root.after(200 * len(connect_text), lambda: self.display_connected(final_text))
 
-    def process_ready_answer(self):
-        answer = self.input_var.get()
-        
-        if answer == "1":
-            self.increase_then_fade_music()
-        elif answer == "2":
-            self.show_dots_and_black_screen()
+    def display_connected(self, final_text):
+        # Отображаем "Connected" зеленым цветом
+        label = tk.Label(self.root, text=final_text, font=("Courier", 24), fg="green", bg="black")
+        label.pack(expand=True)
 
-    def increase_then_fade_music(self):
-        # Резко увеличиваем громкость, затем уменьшаем до нуля через секунду
-        pygame.mixer.music.set_volume(1.0)
-        self.root.after(1000, lambda: pygame.mixer.music.set_volume(0.0))
-        
-        # Переход к эффекту открытия глаз
-        self.root.after(2000, self.open_eyes_effect)
-
-    def show_dots_and_black_screen(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        
-        dots_label = tk.Label(self.root, text="...", font=("Courier", 48), fg="white", bg="black")
-        dots_label.pack(expand=True)
-        
+        # Пауза перед черным экраном
         self.root.after(3000, self.clear_screen)
-
-    def open_eyes_effect(self):
-        # Эффект открытия глаз с черными полосами
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-        # Верхняя и нижняя полосы
-        self.top_bar = tk.Frame(self.root, bg="black", height=300)
-        self.top_bar.pack(fill=tk.X)
-        self.middle_frame = tk.Frame(self.root, bg="black")
-        self.middle_frame.pack(fill=tk.BOTH, expand=True)
-        self.bottom_bar = tk.Frame(self.root, bg="black", height=300)
-        self.bottom_bar.pack(fill=tk.X)
-
-        # Постепенное уменьшение высоты полос
-        self.decrease_bar_height()
-
-    def decrease_bar_height(self):
-        # Уменьшение высоты полос для эффекта открытия глаз
-        top_height = self.top_bar.winfo_height()
-        bottom_height = self.bottom_bar.winfo_height()
-        
-        if top_height > 0 and bottom_height > 0:
-            new_height = max(0, top_height - 10)
-            self.top_bar.config(height=new_height)
-            self.bottom_bar.config(height=new_height)
-            self.root.after(50, self.decrease_bar_height)
-        else:
-            # После открытия глаз показать финальное изображение
-            self.show_final_scene()
-
-    def show_final_scene(self):
-        # Здесь вы можете добавить изображение комнаты в пиксельном стиле
-        self.middle_frame.destroy()
-        final_image = Image.open("./data/game/final_scene.png")
-        final_image = final_image.resize((self.root.winfo_screenwidth(), self.root.winfo_screenheight()), Image.NEAREST)
-        final_photo = ImageTk.PhotoImage(final_image)
-        final_label = tk.Label(self.root, image=final_photo)
-        final_label.image = final_photo  # Сохранение ссылки на изображение
-        final_label.pack(expand=True, fill=tk.BOTH)
 
     def clear_screen(self):
         for widget in self.root.winfo_children():
