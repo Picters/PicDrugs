@@ -25,6 +25,10 @@ class GameApp:
         self.open_folder_sound = pygame.mixer.Sound("./data/game/open_folder.mp3")
         self.open_folder_sound.set_volume(1.0)
 
+        # Звук огня
+        self.fire_sound = pygame.mixer.Sound("./data/game/fire.mp3")
+        self.fire_sound.set_volume(1.0)
+
         # Музыка для игры и меню
         self.game_music_file = "./data/game/X.mp3"
         self.menu_music_file = "./data/main/music.wav"
@@ -269,7 +273,7 @@ class GameApp:
         self.console_frame.place(x=10, y=10)
 
         # Создаем мигающую полоску в верхнем левом углу внутри фрейма
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 18), fg="white", bg="black")
         self.cursor_label.pack(side='left')
         self.blink_cursor(self.cursor_label)
 
@@ -293,7 +297,7 @@ class GameApp:
         self.cursor_label.pack_forget()
 
         # Создаем лейбл для текста подключения
-        self.connect_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+        self.connect_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="white", bg="black")
         self.connect_label.pack(side='left')
 
         # Возвращаем курсор
@@ -352,7 +356,7 @@ class GameApp:
             error = errors.pop(0)
             x = random.randint(0, self.root.winfo_screenwidth() - 300)
             y = random.randint(0, self.root.winfo_screenheight() - 50)
-            error_label = tk.Label(self.root, text=error, font=("Courier", 16), fg="red", bg="black")
+            error_label = tk.Label(self.root, text=error, font=("Courier", 14), fg="red", bg="black")
             error_label.place(x=x, y=y)
             self.error_labels.append(error_label)
             # Показ следующей ошибки через короткое время
@@ -376,7 +380,7 @@ class GameApp:
         self.console_frame.place(x=10, y=10)
 
         # Мигающий курсор
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 18), fg="white", bg="black")
         self.cursor_label.pack(side='left')
         self.blink_cursor(self.cursor_label)
 
@@ -406,7 +410,7 @@ class GameApp:
             self.cursor_label.pack_forget()
 
             # Создаем лейбл с текстом команды
-            command_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            command_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="white", bg="black")
             command_label.pack(anchor='w')
             # Печатаем команду посимвольно
             for i, char in enumerate(command):
@@ -428,7 +432,7 @@ class GameApp:
     def show_system_restored(self):
         # Отображаем "System is Restored" зелёным цветом
         self.cursor_label.pack_forget()
-        self.restored_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="green", bg="black")
+        self.restored_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="green", bg="black")
         self.restored_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         restored_text = "System is Restored"
@@ -441,7 +445,7 @@ class GameApp:
     def start_system_startup_sequence(self):
         # Отображаем "Starting system" оранжевым цветом
         self.cursor_label.pack_forget()
-        self.starting_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="orange", bg="black")
+        self.starting_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="orange", bg="black")
         self.starting_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         starting_text = "Starting system"
@@ -483,7 +487,7 @@ class GameApp:
             # Удаляем курсор временно
             self.cursor_label.pack_forget()
             # Создаем лейбл
-            component_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            component_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="white", bg="black")
             component_label.pack(anchor='w')
             # Печатаем строку компонента
             for i, char in enumerate(component):
@@ -504,7 +508,7 @@ class GameApp:
         # Удаляем курсор временно
         self.cursor_label.pack_forget()
         # Отображаем "System Started......." белым цветом
-        self.started_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+        self.started_label = tk.Label(self.console_frame, text="", font=("Courier", 18), fg="white", bg="black")
         self.started_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         started_text = "System Started......."
@@ -523,8 +527,10 @@ class GameApp:
         # Воспроизвести final_scene.mp3
         self.final_scene_sound.play()
 
-        # Загрузка изображения папки
+        # Загрузка изображения папки и изменение её размера
         folder_image = Image.open("./data/game/folder.png")
+        # Изменяем размер изображения
+        folder_image = folder_image.resize((200, 200), Image.LANCZOS)
         folder_photo = ImageTk.PhotoImage(folder_image)
         self.folder_label = tk.Label(self.root, image=folder_photo, bg="white")
         self.folder_label.image = folder_photo  # Сохранение ссылки на изображение
@@ -559,11 +565,12 @@ class GameApp:
             "КОНФИДЕНЦИАЛЬНО"
         )
 
-        self.secret_label = tk.Label(self.root, text=secret_text, font=("Courier", 24), fg="black", bg="white")
+        self.secret_label = tk.Label(self.root, text=secret_text, font=("Courier", 16), fg="black", bg="white")
         self.secret_label.pack(pady=50)
 
         # Загрузка изображения крестика (закрыть)
         close_image = Image.open("./data/game/close.png")
+        close_image = close_image.resize((30, 30), Image.LANCZOS)
         close_photo = ImageTk.PhotoImage(close_image)
         self.close_button = tk.Label(self.root, image=close_photo, bg="white")
         self.close_button.image = close_photo  # Сохранение ссылки на изображение
@@ -583,15 +590,137 @@ class GameApp:
     def show_folder_again(self):
         # Отображение папки снова
         folder_image = Image.open("./data/game/folder.png")
+        folder_image = folder_image.resize((200, 200), Image.LANCZOS)
         folder_photo = ImageTk.PhotoImage(folder_image)
         self.folder_label = tk.Label(self.root, image=folder_photo, bg="white")
         self.folder_label.image = folder_photo
         self.folder_label.pack(expand=True)
 
         # Привязка события клика на папку
-        self.folder_label.bind("<Button-1>", self.open_folder)
+        self.folder_label.bind("<Button-1>", self.ask_take_matches)
 
-        # Игра не завершается, можно добавить дополнительную логику здесь
+    # Новые методы для спичек и огня
+    def ask_take_matches(self, event=None):
+        # Удаляем папку
+        self.folder_label.destroy()
+
+        # Вопрос "Достать спички?"
+        self.ask_question("Достать спички?", "ДА", "НЕТ", self.process_take_matches_choice)
+
+    def process_take_matches_choice(self):
+        answer = self.input_var.get()
+        if answer == "1":
+            self.show_matches_animation()
+        elif answer == "2":
+            self.show_angel_scene()
+        else:
+            self.show_error_screen(self.ask_take_matches)
+
+    def show_matches_animation(self):
+        # Удаляем вопрос
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Загружаем изображение спичек
+        matches_image = Image.open("./data/game/spichki.png")
+        matches_image = matches_image.resize((100, 200), Image.LANCZOS)
+        matches_photo = ImageTk.PhotoImage(matches_image)
+        self.matches_label = tk.Label(self.root, image=matches_photo, bg="white")
+        self.matches_label.image = matches_photo
+        self.matches_label.place(x=self.root.winfo_screenwidth() // 2, y=self.root.winfo_screenheight())
+
+        # Анимация появления спичек снизу вверх
+        self.animate_matches(self.root.winfo_screenheight(), self.root.winfo_screenheight() // 2)
+
+    def animate_matches(self, current_y, target_y):
+        if current_y > target_y:
+            current_y -= 10
+            self.matches_label.place(y=current_y)
+            self.root.after(10, lambda: self.animate_matches(current_y, target_y))
+        else:
+            # После анимации задаем вопрос "Сжечь?"
+            self.ask_burn_question()
+
+    def ask_burn_question(self):
+        self.ask_question("Сжечь?", "ДА", "НЕТ", self.process_burn_choice)
+
+    def process_burn_choice(self):
+        answer = self.input_var.get()
+        if answer == "1":
+            self.start_burning()
+        elif answer == "2":
+            # Удаляем спички и возвращаемся к вопросу "Достать спички?"
+            self.matches_label.destroy()
+            self.ask_take_matches()
+        else:
+            self.show_error_screen(self.ask_burn_question)
+
+    def start_burning(self):
+        # Удаляем спички
+        self.matches_label.destroy()
+        self.folder_label.destroy()
+
+        # Воспроизводим звук огня
+        self.fire_sound.play()
+
+        # Отображаем изображение огня
+        fire_image = Image.open("./data/game/fire.png")
+        fire_image = fire_image.resize((200, 200), Image.LANCZOS)
+        fire_photo = ImageTk.PhotoImage(fire_image)
+        self.fire_label = tk.Label(self.root, image=fire_photo, bg="white")
+        self.fire_label.image = fire_photo
+        self.fire_label.pack(expand=True)
+
+        # Через несколько секунд закрываем игру
+        self.root.after(3000, self.exit_game)
+
+    def show_angel_scene(self):
+        # Удаляем вопрос
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Загружаем изображение ангела
+        angel_image = Image.open("./data/game/Angel.png")
+        angel_image = angel_image.resize((200, 200), Image.LANCZOS)
+        angel_photo = ImageTk.PhotoImage(angel_image)
+        self.angel_label = tk.Label(self.root, image=angel_photo, bg="white")
+        self.angel_label.image = angel_photo
+        self.angel_label.place(x=self.root.winfo_screenwidth() // 2, y=-200)
+
+        # Анимация спуска ангела сверху вниз
+        self.animate_angel_down(-200, self.root.winfo_screenheight() // 2 - 100)
+
+    def animate_angel_down(self, current_y, target_y):
+        if current_y < target_y:
+            current_y += 5
+            self.angel_label.place(y=current_y)
+            self.root.after(10, lambda: self.animate_angel_down(current_y, target_y))
+        else:
+            # Показываем сообщение
+            self.show_angel_message()
+
+    def show_angel_message(self):
+        message_label = tk.Label(self.root, text="Ты сделал правильный выбор.", font=("Courier", 16), fg="black", bg="white")
+        message_label.place(relx=0.5, rely=0.7, anchor='center')
+        # После 3 секунд начинаем анимацию исчезновения ангела
+        self.root.after(3000, lambda: self.animate_angel_up(message_label))
+
+    def animate_angel_up(self, message_label):
+        # Удаляем сообщение
+        message_label.destroy()
+        # Анимация подъёма ангела вверх с исчезновением
+        self.fade_out_angel(self.root.winfo_screenheight() // 2 - 100)
+
+    def fade_out_angel(self, current_y):
+        if current_y > -200:
+            current_y -= 5
+            self.angel_label.place(y=current_y)
+            current_alpha = self.angel_label.winfo_fpixels('alpha') - 0.01 if hasattr(self.angel_label, 'alpha') else 1.0
+            self.angel_label.attributes("-alpha", current_alpha)
+            self.root.after(10, lambda: self.fade_out_angel(current_y))
+        else:
+            # Закрываем игру через 1 секунду
+            self.root.after(1000, self.exit_game)
 
     def start_escape_countdown(self, event):
         if not self.escape_pressed:
