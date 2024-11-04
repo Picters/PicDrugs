@@ -1,21 +1,22 @@
 import tkinter as tk
 import pygame
+import random  # Импортируем random для мерцания цветов
 from PIL import Image, ImageTk
 
 class GameApp:
     def __init__(self, root):
         self.root = root
         self.root.title("PicX")
-        
+
         pygame.mixer.init()
-        
+
         # Load sounds
         self.click_sound = pygame.mixer.Sound("./data/game/click.mp3")
         self.click_sound.set_volume(1.0)
-        
+
         self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
         self.keypress_sound.set_volume(0.2)
-        
+
         # Game and menu music
         self.game_music_file = "./data/game/X.mp3"
         self.menu_music_file = "./data/main/music.wav"
@@ -23,17 +24,17 @@ class GameApp:
         # Window settings
         self.root.attributes("-fullscreen", True)
         self.root.configure(bg="black")
-        
+
         # State tracking variables
         self.click_enabled = False
         self.escape_pressed = False
         self.escape_counter = 5
         self.escape_label = None
-        
+
         # Key event bindings
         self.root.bind("<Escape>", self.start_escape_countdown)
         self.root.bind("<KeyRelease-Escape>", self.stop_escape_countdown)
-        
+
         # Start main menu
         self.main_menu()
 
@@ -62,9 +63,9 @@ class GameApp:
         # Clear previous widgets
         for widget in self.root.winfo_children():
             widget.destroy()
-        
+
         self.play_menu_music()
-        
+
         # Display "PicX" as a question
         question_label = tk.Label(
             self.root,
@@ -104,7 +105,7 @@ class GameApp:
 
     def process_main_menu_selection(self):
         answer = self.input_var.get()
-        
+
         if answer == "1":
             self.play_click_sound()
             self.start_game()
@@ -170,19 +171,19 @@ class GameApp:
 
         frame = tk.Frame(self.root, bg="black")
         frame.pack(expand=True)
-        
+
         question_label = tk.Label(frame, text=f"{question}\n\n1. {option1}\n2. {option2}", font=("Courier", 18), fg="white", bg="black")
         question_label.pack(pady=20)
-        
+
         self.input_var = tk.StringVar()
         input_entry = tk.Entry(frame, textvariable=self.input_var, font=("Courier", 18), fg="white", bg="black", insertbackground="white", width=2)
         input_entry.pack(pady=20)
         input_entry.focus()
-        
+
         input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry, event))
-        
+
         input_entry.bind("<Return>", lambda event: self.process_answer(option1, option2, next_question_callback, exit_on_no))
-        
+
         submit_button = tk.Button(
             frame, text="ОК", font=("Helvetica", 18),
             command=lambda: self.process_answer(option1, option2, next_question_callback, exit_on_no)
@@ -197,7 +198,7 @@ class GameApp:
 
     def process_answer(self, option1, option2, next_question_callback, exit_on_no):
         answer = self.input_var.get()
-        
+
         if answer == "1":
             self.show_transition(next_question_callback)
         elif answer == "2":
@@ -213,7 +214,7 @@ class GameApp:
     def show_transition(self, next_question_callback):
         for widget in self.root.winfo_children():
             widget.destroy()
-        
+
         # Отображаем черный экран на 2 секунды
         black_screen = tk.Frame(self.root, bg="black")
         black_screen.pack(fill=tk.BOTH, expand=True)
@@ -222,10 +223,10 @@ class GameApp:
     def show_error_screen(self, retry_callback):
         for widget in self.root.winfo_children():
             widget.destroy()
-        
+
         error_label = tk.Label(self.root, text="...", font=("Helvetica", 48), fg="white", bg="black")
         error_label.pack(expand=True)
-        
+
         self.root.after(3000, retry_callback)
 
     def start_end_sequence(self):
@@ -236,14 +237,14 @@ class GameApp:
         pygame.mixer.music.set_volume(1.0)
         final_label = tk.Label(self.root, text="Хорошо", font=("Courier", 36), fg="white", bg="black")
         final_label.pack(expand=True)
-        
+
         self.root.after(1000, self.fade_out_sound_and_show_black_screen)  # Задержка в 1 секунду
 
     def fade_out_sound_and_show_black_screen(self):
         # Плавное уменьшение громкости до нуля
         for i in range(10):
             self.root.after(i * 100, lambda v=1 - (i * 0.1): pygame.mixer.music.set_volume(v))
-        
+
         # После затухания звука показать черный экран
         self.root.after(1000, self.show_black_screen)  # После 1 секунды
 
@@ -251,18 +252,22 @@ class GameApp:
         # Очистка экрана и переход на черный экран
         for widget in self.root.winfo_children():
             widget.destroy()
-        
+
         black_screen = tk.Frame(self.root, bg="black")
         black_screen.pack(fill=tk.BOTH, expand=True)
-        
+
         # После 2 секунд черный экран показываем мигающую полоску
         self.root.after(2000, self.show_cursor_effect)
 
     def show_cursor_effect(self):
-        # Создаем мигающую полоску в верхнем левом углу
-        cursor_label = tk.Label(self.root, text="_", font=("Courier", 48), fg="white", bg="black")
-        cursor_label.place(x=10, y=10)  # Установка положения в верхний левый угол
-        self.blink_cursor(cursor_label)
+        # Создаем фрейм для курсора и текста
+        self.console_frame = tk.Frame(self.root, bg="black")
+        self.console_frame.place(x=10, y=10)
+
+        # Создаем мигающую полоску в верхнем левом углу внутри фрейма
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
 
         # После 5 секунд показываем код подключения
         self.root.after(5000, self.show_connect_message)
@@ -276,36 +281,127 @@ class GameApp:
         blink()
 
     def show_connect_message(self):
-        # Очистить экран от предыдущих виджетов
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        
         # Сообщение подключения
         connect_text = "Connect ............ "
         final_text = "Connected"
-        
-        label = tk.Label(self.root, text="", font=("Courier", 24), fg="white", bg="black")
-        label.pack(expand=True)
-        
+
+        # Удаляем курсор из фрейма временно
+        self.cursor_label.pack_forget()
+
+        # Создаем лейбл для текста подключения
+        self.connect_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+        self.connect_label.pack(side='left')
+
+        # Возвращаем курсор обратно
+        self.cursor_label.pack(side='left')
+
         # Начать писать код
         for i, char in enumerate(connect_text):
-            self.root.after(200 * i, lambda c=char: label.config(text=label.cget("text") + c))
-        
+            self.root.after(200 * i, lambda c=char: self.connect_label.config(text=self.connect_label.cget("text") + c))
+
         # После завершения показа "Connected"
         self.root.after(200 * len(connect_text), lambda: self.display_connected(final_text))
 
     def display_connected(self, final_text):
-        # Отображаем "Connected" зеленым цветом
-        label = tk.Label(self.root, text=final_text, font=("Courier", 24), fg="green", bg="black")
-        label.pack(expand=True)
+        # Обновляем текст на "Connected" зеленым цветом
+        self.connect_label.config(text=final_text, fg="green")
 
-        # Пауза перед черным экраном
-        self.root.after(3000, self.clear_screen)
+        # Пауза перед запуском следующей последовательности
+        self.root.after(3000, self.start_error_sequence)
 
-    def clear_screen(self):
+    def start_error_sequence(self):
+        # Очистить экран
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Запуск мерцания
+        self.flicker_start_time = self.root.after(0, self.colorful_flicker)
+        # Через 3 секунды остановить мерцание и запустить ошибку
+        self.root.after(3000, self.stop_flicker_and_show_error)
+
+    def colorful_flicker(self):
+        # Случайный цвет фона
+        colors = ["red", "green", "blue", "yellow", "purple", "orange", "white"]
+        color = random.choice(colors)
+        self.root.configure(bg=color)
+        self.flicker_start_time = self.root.after(100, self.colorful_flicker)
+
+    def stop_flicker_and_show_error(self):
+        # Остановить мерцание
+        if self.flicker_start_time:
+            self.root.after_cancel(self.flicker_start_time)
+            self.flicker_start_time = None
+
+        # Вернуть черный фон
+        self.root.configure(bg="black")
+
+        # Воспроизвести звук ошибки
+        error_sound = pygame.mixer.Sound("./data/game/Error.mp3")
+        error_sound.set_volume(1.0)
+        error_sound.play()
+
+        # Показать команды исправления ошибки
+        self.show_error_commands()
+
+    def show_error_commands(self):
+        # Создаем фрейм для консоли
+        self.console_frame = tk.Frame(self.root, bg="black")
+        self.console_frame.place(x=10, y=10)
+
+        # Мигающий курсор
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
+
+        # Список команд для отображения
+        commands = [
+            "System error detected...",
+            "Attempting to recover...",
+            "Loading backup files...",
+            "Restoring system settings...",
+            "Checking disk integrity...",
+            "Recompiling core modules...",
+            "Restarting essential services...",
+            "Updating configuration...",
+            "Clearing temporary files...",
+            "Applying security patches...",
+            "Finalizing recovery...",
+            "Operation completed successfully."
+        ]
+
+        self.command_index = 0
+        self.execute_commands(commands)
+
+    def execute_commands(self, commands):
+        if self.command_index < len(commands):
+            command = commands[self.command_index]
+            # Удаляем курсор временно
+            self.cursor_label.pack_forget()
+
+            # Создаем или обновляем лейбл с текстом команды
+            if hasattr(self, 'command_label'):
+                self.command_label.config(text=command)
+            else:
+                self.command_label = tk.Label(self.console_frame, text=command, font=("Courier", 24), fg="white", bg="black")
+                self.command_label.pack(side='left')
+
+            # Возвращаем курсор
+            self.cursor_label.pack(side='left')
+
+            self.command_index += 1
+            # Пауза перед следующей командой
+            self.root.after(500, lambda: self.execute_commands(commands))
+        else:
+            # После выполнения всех команд
+            self.root.after(2000, self.end_game)
+
+    def end_game(self):
+        # Очистить экран и завершить игру
         for widget in self.root.winfo_children():
             widget.destroy()
         self.root.configure(bg="black")
+        # Выход из игры
+        self.exit_game()
 
     def start_escape_countdown(self, event):
         if not self.escape_pressed:
