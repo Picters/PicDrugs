@@ -13,6 +13,9 @@ class GameApp:
         self.click_sound = pygame.mixer.Sound("./data/game/click.mp3")
         self.click_sound.set_volume(1.0)
         
+        self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
+        self.keypress_sound.set_volume(0.2)
+        
         # Музыка для игры и меню
         self.game_music_file = "./data/game/X.mp3"
         self.menu_music_file = "./data/main/music.wav"
@@ -23,6 +26,14 @@ class GameApp:
         
         # Запуск главного меню
         self.main_menu()
+
+    def play_click_sound(self):
+        if self.click_enabled:
+            self.click_sound.play()
+
+    def play_keypress_sound(self, char):
+        if char.isalpha() or char.isdigit():
+            self.keypress_sound.play()
 
     def play_menu_music(self):
         pygame.mixer.music.load(self.menu_music_file)
@@ -93,6 +104,7 @@ class GameApp:
 
         loading_label = tk.Label(self.root, text="Загрузка...", font=("Helvetica", 48), fg="white", bg="black")
         loading_label.pack(expand=True)
+
         self.root.after(3000, self.start_game_questions)
 
     def start_game_questions(self):
@@ -106,7 +118,25 @@ class GameApp:
         self.ask_question("Ты боишься темноты?", "ДА", "НЕТ", self.ask_question_4)
 
     def ask_question_4(self):
-        self.ask_question("Спас бы семью если бы она была в опасности?", "ДА", "НЕТ", self.start_end_sequence)
+        self.ask_question("Спас бы семью если бы она была в опасности?", "ДА", "НЕТ", self.ask_question_5)
+
+    def ask_question_5(self):
+        self.ask_question("Вы видели красные огоньки, когда закрывали глаза?", "ДА", "НЕТ", self.ask_question_6)
+
+    def ask_question_6(self):
+        self.ask_question("Когда вам последний раз снились звуки шагов рядом?", "ВЧЕРА", "НИКОГДА", self.ask_question_7)
+
+    def ask_question_7(self):
+        self.ask_question("Куда бы вы пошли, если бы могли идти бесконечно долго?", "НАЗАД", "ВПЕРЕД", self.ask_question_8)
+
+    def ask_question_8(self):
+        self.ask_question("Что страшнее: встретить отражение или собственную тень?", "ОТРАЖЕНИЕ", "ТЕНЬ", self.ask_question_9)
+
+    def ask_question_9(self):
+        self.ask_question("Вы чувствовали себя чужим в знакомом месте?", "ДА", "НЕТ", self.ask_question_10)
+
+    def ask_question_10(self):
+        self.ask_question("Если бы вы могли забыть что-то навсегда, что бы это было?", "ВСЕ ВОСПОМИНАНИЯ", "НИЧЕГО", self.start_end_sequence)
 
     def ask_question(self, question, option1, option2, next_question_callback):
         # Показ вопроса и вариантов ответа
@@ -137,16 +167,27 @@ class GameApp:
     def limit_input_length(self, entry, event):
         if len(entry.get()) > 1:
             entry.delete(1, tk.END)
+        if event.char and (event.char.isalpha() or event.char.isdigit()):
+            self.play_keypress_sound(event.char)
 
     def process_answer(self, option1, option2, next_question_callback):
         answer = self.input_var.get()
         
         if answer == "1":
-            next_question_callback()
+            self.show_transition(next_question_callback)
         elif answer == "2":
             self.exit_game()
         else:
             self.show_error_screen(lambda: self.ask_question(self.current_question, option1, option2, next_question_callback))
+
+    def show_transition(self, next_question_callback):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Отображаем черный экран на 3 секунды
+        black_screen = tk.Frame(self.root, bg="black")
+        black_screen.pack(fill=tk.BOTH, expand=True)
+        self.root.after(3000, next_question_callback)
 
     def show_error_screen(self, retry_callback):
         for widget in self.root.winfo_children():
