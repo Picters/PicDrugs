@@ -1,6 +1,6 @@
 import tkinter as tk
 import pygame
-import random  # Импортируем random для мерцания цветов
+import random  # Для эффекта мерцания
 from PIL import Image, ImageTk
 
 class GameApp:
@@ -10,32 +10,32 @@ class GameApp:
 
         pygame.mixer.init()
 
-        # Load sounds
+        # Загрузка звуков
         self.click_sound = pygame.mixer.Sound("./data/game/click.mp3")
         self.click_sound.set_volume(1.0)
 
         self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
         self.keypress_sound.set_volume(0.2)
 
-        # Game and menu music
+        # Музыка для игры и меню
         self.game_music_file = "./data/game/X.mp3"
         self.menu_music_file = "./data/main/music.wav"
 
-        # Window settings
+        # Настройки окна
         self.root.attributes("-fullscreen", True)
         self.root.configure(bg="black")
 
-        # State tracking variables
+        # Переменные состояния
         self.click_enabled = False
         self.escape_pressed = False
         self.escape_counter = 5
         self.escape_label = None
 
-        # Key event bindings
+        # Привязки событий клавиатуры
         self.root.bind("<Escape>", self.start_escape_countdown)
         self.root.bind("<KeyRelease-Escape>", self.stop_escape_countdown)
 
-        # Start main menu
+        # Запуск главного меню
         self.main_menu()
 
     def play_click_sound(self):
@@ -48,7 +48,7 @@ class GameApp:
 
     def play_menu_music(self):
         pygame.mixer.music.load(self.menu_music_file)
-        pygame.mixer.music.set_volume(1.0)  # Установить громкость на 100%
+        pygame.mixer.music.set_volume(1.0)  # Устанавливаем громкость на 100%
         pygame.mixer.music.play(loops=-1)
 
     def stop_menu_music(self):
@@ -60,13 +60,13 @@ class GameApp:
         pygame.mixer.music.play(loops=-1)
 
     def main_menu(self):
-        # Clear previous widgets
+        # Очистка предыдущих виджетов
         for widget in self.root.winfo_children():
             widget.destroy()
 
         self.play_menu_music()
 
-        # Display "PicX" as a question
+        # Отображение "PicX" как вопроса
         question_label = tk.Label(
             self.root,
             text="PicX\n\n1. Играть\n2. Выйти",
@@ -76,7 +76,7 @@ class GameApp:
         )
         question_label.pack(pady=100)
 
-        # Input field for selecting options
+        # Поле ввода для выбора опций
         self.input_var = tk.StringVar()
         input_entry = tk.Entry(
             self.root,
@@ -90,11 +90,11 @@ class GameApp:
         input_entry.pack(pady=20)
         input_entry.focus()
 
-        # Limit to one character and play sound for valid inputs
+        # Ограничение ввода одним символом и воспроизведение звука
         input_entry.bind("<KeyRelease>", lambda event: self.limit_input_length(input_entry, event))
         input_entry.bind("<Return>", lambda event: self.process_main_menu_selection())
 
-        # OK button to confirm selection
+        # Кнопка подтверждения выбора
         submit_button = tk.Button(
             self.root,
             text="OK",
@@ -205,7 +205,7 @@ class GameApp:
             if exit_on_no:  # Если на первом вопросе "НЕТ", выходим из игры
                 self.exit_game()
             elif next_question_callback == self.start_end_sequence:
-                self.show_dots_and_exit()  # Показывать три точки при последнем вопросе
+                self.show_dots_and_exit()  # Показывать три точки и выйти
             else:
                 self.show_transition(next_question_callback)  # Показать следующий вопрос
         else:
@@ -285,14 +285,14 @@ class GameApp:
         connect_text = "Connect ............ "
         final_text = "Connected"
 
-        # Удаляем курсор из фрейма временно
+        # Удаляем курсор временно
         self.cursor_label.pack_forget()
 
         # Создаем лейбл для текста подключения
         self.connect_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
         self.connect_label.pack(side='left')
 
-        # Возвращаем курсор обратно
+        # Возвращаем курсор
         self.cursor_label.pack(side='left')
 
         # Начать писать код
@@ -300,13 +300,14 @@ class GameApp:
             self.root.after(200 * i, lambda c=char: self.connect_label.config(text=self.connect_label.cget("text") + c))
 
         # После завершения показа "Connected"
-        self.root.after(200 * len(connect_text), lambda: self.display_connected(final_text))
+        total_time = 200 * len(connect_text)
+        self.root.after(total_time, lambda: self.display_connected(final_text))
 
     def display_connected(self, final_text):
         # Обновляем текст на "Connected" зеленым цветом
         self.connect_label.config(text=final_text, fg="green")
 
-        # Пауза перед запуском следующей последовательности
+        # Пауза перед запуском последовательности ошибки
         self.root.after(3000, self.start_error_sequence)
 
     def start_error_sequence(self):
@@ -380,27 +381,175 @@ class GameApp:
 
             # Создаем или обновляем лейбл с текстом команды
             if hasattr(self, 'command_label'):
-                self.command_label.config(text=command)
-            else:
-                self.command_label = tk.Label(self.console_frame, text=command, font=("Courier", 24), fg="white", bg="black")
-                self.command_label.pack(side='left')
-
-            # Возвращаем курсор
+                self.command_label.destroy()
+            self.command_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            self.command_label.pack(anchor='w')
             self.cursor_label.pack(side='left')
 
+            # Печатаем команду посимвольно
+            for i, char in enumerate(command):
+                self.root.after(200 * i, lambda c=char: self.command_label.config(text=self.command_label.cget("text") + c))
+            total_time = 200 * len(command)
+            # После печати команды переходим к следующей
             self.command_index += 1
-            # Пауза перед следующей командой
-            self.root.after(500, lambda: self.execute_commands(commands))
+            self.root.after(total_time + 500, lambda: self.execute_commands(commands))
         else:
-            # После выполнения всех команд
-            self.root.after(2000, self.end_game)
+            # После выполнения всех команд запускаем глитч эффект
+            self.root.after(2000, self.start_glitch_effect)
 
-    def end_game(self):
-        # Очистить экран и завершить игру
+    def start_glitch_effect(self):
+        # Очистить экран
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        # Запуск глитч эффекта
+        self.glitch_start_time = self.root.after(0, self.glitch_flicker)
+        # Воспроизвести звук помех
+        glitch_sound = pygame.mixer.Sound("./data/game/glitch.mp3")
+        glitch_sound.set_volume(1.0)
+        glitch_sound.play()
+        # Через 2 секунды остановить глитч эффект и продолжить
+        self.root.after(2000, self.stop_glitch_and_show_restored)
+
+    def glitch_flicker(self):
+        # Эффект случайного шума
+        colors = ["black", "white", "gray"]
+        color = random.choice(colors)
+        self.root.configure(bg=color)
+        self.glitch_start_time = self.root.after(50, self.glitch_flicker)
+
+    def stop_glitch_and_show_restored(self):
+        # Остановить глитч эффект
+        if self.glitch_start_time:
+            self.root.after_cancel(self.glitch_start_time)
+            self.glitch_start_time = None
+        # Сбросить фон
+        self.root.configure(bg="black")
+        # Показать "System is Restored"
+        self.show_system_restored()
+
+    def show_system_restored(self):
+        # Воссоздаем консольный фрейм
+        self.console_frame = tk.Frame(self.root, bg="black")
+        self.console_frame.place(x=10, y=10)
+        # Курсор
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
+        # Удаляем курсор временно
+        self.cursor_label.pack_forget()
+        # Отображаем "System is Restored" зелёным цветом
+        self.restored_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="green", bg="black")
+        self.restored_label.pack(side='left')
+        self.cursor_label.pack(side='left')
+        restored_text = "System is Restored"
+        for i, char in enumerate(restored_text):
+            self.root.after(200 * i, lambda c=char: self.restored_label.config(text=self.restored_label.cget("text") + c))
+        # После печати текста, ждём 4 секунды и продолжаем
+        total_time = 200 * len(restored_text)
+        self.root.after(total_time + 4000, self.start_system_startup_sequence)
+
+    def start_system_startup_sequence(self):
+        # Удаляем предыдущие лейблы
+        for widget in self.console_frame.winfo_children():
+            widget.destroy()
+        # Курсор
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
+        # Отображаем "Starting system" оранжевым цветом
+        self.cursor_label.pack_forget()
+        self.starting_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="orange", bg="black")
+        self.starting_label.pack(side='left')
+        self.cursor_label.pack(side='left')
+        starting_text = "Starting system"
+        for i, char in enumerate(starting_text):
+            self.root.after(200 * i, lambda c=char: self.starting_label.config(text=self.starting_label.cget("text") + c))
+        # После печати продолжаем к компонентам
+        total_time = 200 * len(starting_text)
+        self.root.after(total_time, self.show_components_startup)
+
+    def show_components_startup(self):
+        # Удаляем предыдущие лейблы
+        for widget in self.console_frame.winfo_children():
+            widget.destroy()
+        # Курсор
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
+        # Список компонентов
+        components = [
+            "Disk C:\\......... Done",
+            "System Tracing......... Done",
+            "Loading drivers......... Done",
+            "Initializing hardware......... Done",
+            "Network services......... Done",
+            "User interface......... Done",
+            "Security protocols......... Done",
+            "Memory check......... Done",
+            "Updating registry......... Done",
+            "Finalizing setup......... Done",
+            "Optimizing performance......... Done",
+            "Cleaning up......... Done",
+            "Applying user settings......... Done",
+            "Launching applications......... Done"
+        ]
+        # Воспроизвести звук "Repair.mp3"
+        repair_sound = pygame.mixer.Sound("./data/game/Repair.mp3")
+        repair_sound.set_volume(1.0)
+        repair_sound.play()
+        # Начинаем отображение компонентов
+        self.component_index = 0
+        self.display_component(components, repair_sound)
+
+    def display_component(self, components, repair_sound):
+        if self.component_index < len(components):
+            component = components[self.component_index]
+            # Удаляем курсор временно
+            self.cursor_label.pack_forget()
+            # Создаем или обновляем лейбл
+            if hasattr(self, 'component_label'):
+                self.component_label.destroy()
+            self.component_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            self.component_label.pack(anchor='w')
+            self.cursor_label.pack(side='left')
+            # Печатаем строку компонента
+            for i, char in enumerate(component):
+                self.root.after(200 * i, lambda c=char: self.component_label.config(text=self.component_label.cget("text") + c))
+            total_time = 200 * len(component)
+            # После печати переходим к следующему компоненту
+            self.component_index += 1
+            self.root.after(total_time + 500, lambda: self.display_component(components, repair_sound))
+        else:
+            # После отображения всех компонентов
+            repair_sound.stop()
+            # Отображаем "System Started......."
+            self.show_system_started()
+
+    def show_system_started(self):
+        # Удаляем предыдущие лейблы
+        for widget in self.console_frame.winfo_children():
+            widget.destroy()
+        # Курсор
+        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
+        self.cursor_label.pack(side='left')
+        self.blink_cursor(self.cursor_label)
+        # Отображаем "System Started......."
+        self.cursor_label.pack_forget()
+        self.started_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+        self.started_label.pack(side='left')
+        self.cursor_label.pack(side='left')
+        started_text = "System Started......."
+        for i, char in enumerate(started_text):
+            self.root.after(200 * i, lambda c=char: self.started_label.config(text=self.started_label.cget("text") + c))
+        total_time = 200 * len(started_text)
+        # После отображения, ждем секунду и затем черный экран
+        self.root.after(total_time + 1000, self.clear_screen)
+
+    def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
         self.root.configure(bg="black")
-        # Выход из игры
+        # Выход из игры или дальнейшие действия
         self.exit_game()
 
     def start_escape_countdown(self, event):
