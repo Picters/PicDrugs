@@ -1,6 +1,6 @@
 import tkinter as tk
 import pygame
-import random  # Для эффекта мерцания
+import random
 from PIL import Image, ImageTk
 
 class GameApp:
@@ -16,6 +16,14 @@ class GameApp:
 
         self.keypress_sound = pygame.mixer.Sound("./data/game/Keyboard.mp3")
         self.keypress_sound.set_volume(0.2)
+
+        # Звук финальной сцены
+        self.final_scene_sound = pygame.mixer.Sound("./data/game/final_scene.mp3")
+        self.final_scene_sound.set_volume(1.0)
+
+        # Звук открытия папки
+        self.open_folder_sound = pygame.mixer.Sound("./data/game/open_folder.mp3")
+        self.open_folder_sound.set_volume(1.0)
 
         # Музыка для игры и меню
         self.game_music_file = "./data/game/X.mp3"
@@ -48,7 +56,7 @@ class GameApp:
 
     def play_menu_music(self):
         pygame.mixer.music.load(self.menu_music_file)
-        pygame.mixer.music.set_volume(1.0)  # Устанавливаем громкость на 100%
+        pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.play(loops=-1)
 
     def stop_menu_music(self):
@@ -119,7 +127,7 @@ class GameApp:
         self.stop_menu_music()
         self.play_game_music()
         self.click_enabled = True
-        self.show_loading_screen()  # Показ экрана загрузки перед началом вопросов
+        self.show_loading_screen()
 
     def show_loading_screen(self):
         # Очистка экрана и показ текста "Загрузка..."
@@ -202,12 +210,12 @@ class GameApp:
         if answer == "1":
             self.show_transition(next_question_callback)
         elif answer == "2":
-            if exit_on_no:  # Если на первом вопросе "НЕТ", выходим из игры
+            if exit_on_no:
                 self.exit_game()
             elif next_question_callback == self.start_end_sequence:
-                self.show_dots_and_exit()  # Показывать три точки и выйти
+                self.show_dots_and_exit()
             else:
-                self.show_transition(next_question_callback)  # Показать следующий вопрос
+                self.show_transition(next_question_callback)
         else:
             self.show_error_screen(lambda: self.ask_question(self.current_question, option1, option2, next_question_callback, exit_on_no))
 
@@ -215,7 +223,6 @@ class GameApp:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Отображаем черный экран на 2 секунды
         black_screen = tk.Frame(self.root, bg="black")
         black_screen.pack(fill=tk.BOTH, expand=True)
         self.root.after(2000, next_question_callback)
@@ -233,20 +240,17 @@ class GameApp:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Показ надписи "Хорошо" с громким звуком
         pygame.mixer.music.set_volume(1.0)
         final_label = tk.Label(self.root, text="Хорошо", font=("Courier", 36), fg="white", bg="black")
         final_label.pack(expand=True)
 
-        self.root.after(1000, self.fade_out_sound_and_show_black_screen)  # Задержка в 1 секунду
+        self.root.after(1000, self.fade_out_sound_and_show_black_screen)
 
     def fade_out_sound_and_show_black_screen(self):
-        # Плавное уменьшение громкости до нуля
         for i in range(10):
             self.root.after(i * 100, lambda v=1 - (i * 0.1): pygame.mixer.music.set_volume(v))
 
-        # После затухания звука показать черный экран
-        self.root.after(1000, self.show_black_screen)  # После 1 секунды
+        self.root.after(1000, self.show_black_screen)
 
     def show_black_screen(self):
         # Очистка экрана и переход на черный экран
@@ -297,51 +301,73 @@ class GameApp:
 
         # Начать писать код
         for i, char in enumerate(connect_text):
-            self.root.after(200 * i, lambda c=char: self.connect_label.config(text=self.connect_label.cget("text") + c))
-
+            self.root.after(50 * i, lambda c=char: self.connect_label.config(text=self.connect_label.cget("text") + c))
+        total_time = 50 * len(connect_text)
         # После завершения показа "Connected"
-        total_time = 200 * len(connect_text)
         self.root.after(total_time, lambda: self.display_connected(final_text))
 
     def display_connected(self, final_text):
         # Обновляем текст на "Connected" зеленым цветом
         self.connect_label.config(text=final_text, fg="green")
 
-        # Пауза перед запуском последовательности ошибки
-        self.root.after(3000, self.start_error_sequence)
+        # Пауза перед запуском последовательности ошибок драйверов
+        self.root.after(1000, self.show_driver_errors)
 
-    def start_error_sequence(self):
-        # Очистить экран
-        for widget in self.root.winfo_children():
-            widget.destroy()
+    def show_driver_errors(self):
+        # Воспроизвести звук помех
+        glitch_sound = pygame.mixer.Sound("./data/game/glitch.mp3")
+        glitch_sound.set_volume(1.0)
+        glitch_sound.play()
 
-        # Запуск мерцания
-        self.flicker_start_time = self.root.after(0, self.colorful_flicker)
-        # Через 3 секунды остановить мерцание и запустить ошибку
-        self.root.after(3000, self.stop_flicker_and_show_error)
+        # Список ошибок драйверов
+        driver_errors = [
+            "DriverX.sys has failed",
+            "Error loading DriverY.dll",
+            "Device Z not responding",
+            "Unknown error in module ABC",
+            "Critical failure in DEF.sys",
+            "GHI.dll is missing",
+            "Failed to initialize JKL",
+            "Memory access violation at 0x0000",
+            "Stack overflow in MNO",
+            "Unrecognized hardware detected",
+            "PQR.sys corrupted",
+            "S/T Bus error",
+            "Unhandled exception in UVW.exe",
+            "XYZ driver timeout",
+            "System I/O failure",
+            "Kernel panic in module LMN",
+            "Segmentation fault detected",
+            "Invalid opcode at 0xFFFF",
+            "Divide by zero error",
+            "System halt initiated"
+        ]
 
-    def colorful_flicker(self):
-        # Случайный цвет фона
-        colors = ["red", "green", "blue", "yellow", "purple", "orange", "white"]
-        color = random.choice(colors)
-        self.root.configure(bg=color)
-        self.flicker_start_time = self.root.after(100, self.colorful_flicker)
+        # Показ ошибок в случайных местах экрана
+        self.error_labels = []
+        self.show_random_errors(driver_errors)
 
-    def stop_flicker_and_show_error(self):
-        # Остановить мерцание
-        if self.flicker_start_time:
-            self.root.after_cancel(self.flicker_start_time)
-            self.flicker_start_time = None
+    def show_random_errors(self, errors):
+        if errors:
+            error = errors.pop(0)
+            x = random.randint(0, self.root.winfo_screenwidth() - 300)
+            y = random.randint(0, self.root.winfo_screenheight() - 50)
+            error_label = tk.Label(self.root, text=error, font=("Courier", 16), fg="red", bg="black")
+            error_label.place(x=x, y=y)
+            self.error_labels.append(error_label)
+            # Показ следующей ошибки через короткое время
+            self.root.after(100, lambda: self.show_random_errors(errors))
+        else:
+            # Через 2 секунды после начала показываем команды восстановления
+            self.root.after(2000, self.start_error_commands_sequence)
 
-        # Вернуть черный фон
-        self.root.configure(bg="black")
-
-        # Воспроизвести звук ошибки
-        error_sound = pygame.mixer.Sound("./data/game/Error.mp3")
-        error_sound.set_volume(1.0)
-        error_sound.play()
-
-        # Показать команды исправления ошибки
+    def start_error_commands_sequence(self):
+        # Очистить экран от ошибок
+        for label in self.error_labels:
+            label.destroy()
+        # Остановить звук помех
+        pygame.mixer.Sound("./data/game/glitch.mp3").stop()
+        # Показать команды восстановления ошибок
         self.show_error_commands()
 
     def show_error_commands(self):
@@ -379,103 +405,53 @@ class GameApp:
             # Удаляем курсор временно
             self.cursor_label.pack_forget()
 
-            # Создаем или обновляем лейбл с текстом команды
-            if hasattr(self, 'command_label'):
-                self.command_label.destroy()
-            self.command_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
-            self.command_label.pack(anchor='w')
-            self.cursor_label.pack(side='left')
-
+            # Создаем лейбл с текстом команды
+            command_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            command_label.pack(anchor='w')
             # Печатаем команду посимвольно
             for i, char in enumerate(command):
-                self.root.after(200 * i, lambda c=char: self.command_label.config(text=self.command_label.cget("text") + c))
-            total_time = 200 * len(command)
+                self.root.after(50 * i, lambda c=char: command_label.config(text=command_label.cget("text") + c))
+            total_time = 50 * len(command)
+            # Возвращаем курсор
+            self.cursor_label.pack(side='left')
             # После печати команды переходим к следующей
             self.command_index += 1
             self.root.after(total_time + 500, lambda: self.execute_commands(commands))
         else:
-            # После выполнения всех команд запускаем глитч эффект
-            self.root.after(2000, self.start_glitch_effect)
+            # После выполнения всех команд запускаем восстановление системы
+            self.root.after(2000, self.start_system_recovery)
 
-    def start_glitch_effect(self):
-        # Очистить экран
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        # Запуск глитч эффекта
-        self.glitch_start_time = self.root.after(0, self.glitch_flicker)
-        # Воспроизвести звук помех
-        glitch_sound = pygame.mixer.Sound("./data/game/glitch.mp3")
-        glitch_sound.set_volume(1.0)
-        glitch_sound.play()
-        # Через 2 секунды остановить глитч эффект и продолжить
-        self.root.after(2000, self.stop_glitch_and_show_restored)
-
-    def glitch_flicker(self):
-        # Эффект случайного шума
-        colors = ["black", "white", "gray"]
-        color = random.choice(colors)
-        self.root.configure(bg=color)
-        self.glitch_start_time = self.root.after(50, self.glitch_flicker)
-
-    def stop_glitch_and_show_restored(self):
-        # Остановить глитч эффект
-        if self.glitch_start_time:
-            self.root.after_cancel(self.glitch_start_time)
-            self.glitch_start_time = None
-        # Сбросить фон
-        self.root.configure(bg="black")
+    def start_system_recovery(self):
         # Показать "System is Restored"
         self.show_system_restored()
 
     def show_system_restored(self):
-        # Воссоздаем консольный фрейм
-        self.console_frame = tk.Frame(self.root, bg="black")
-        self.console_frame.place(x=10, y=10)
-        # Курсор
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
-        self.cursor_label.pack(side='left')
-        self.blink_cursor(self.cursor_label)
-        # Удаляем курсор временно
-        self.cursor_label.pack_forget()
         # Отображаем "System is Restored" зелёным цветом
+        self.cursor_label.pack_forget()
         self.restored_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="green", bg="black")
-        self.restored_label.pack(side='left')
+        self.restored_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         restored_text = "System is Restored"
         for i, char in enumerate(restored_text):
-            self.root.after(200 * i, lambda c=char: self.restored_label.config(text=self.restored_label.cget("text") + c))
+            self.root.after(50 * i, lambda c=char: self.restored_label.config(text=self.restored_label.cget("text") + c))
         # После печати текста, ждём 4 секунды и продолжаем
-        total_time = 200 * len(restored_text)
+        total_time = 50 * len(restored_text)
         self.root.after(total_time + 4000, self.start_system_startup_sequence)
 
     def start_system_startup_sequence(self):
-        # Удаляем предыдущие лейблы
-        for widget in self.console_frame.winfo_children():
-            widget.destroy()
-        # Курсор
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
-        self.cursor_label.pack(side='left')
-        self.blink_cursor(self.cursor_label)
         # Отображаем "Starting system" оранжевым цветом
         self.cursor_label.pack_forget()
         self.starting_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="orange", bg="black")
-        self.starting_label.pack(side='left')
+        self.starting_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         starting_text = "Starting system"
         for i, char in enumerate(starting_text):
-            self.root.after(200 * i, lambda c=char: self.starting_label.config(text=self.starting_label.cget("text") + c))
+            self.root.after(50 * i, lambda c=char: self.starting_label.config(text=self.starting_label.cget("text") + c))
         # После печати продолжаем к компонентам
-        total_time = 200 * len(starting_text)
+        total_time = 50 * len(starting_text)
         self.root.after(total_time, self.show_components_startup)
 
     def show_components_startup(self):
-        # Удаляем предыдущие лейблы
-        for widget in self.console_frame.winfo_children():
-            widget.destroy()
-        # Курсор
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
-        self.cursor_label.pack(side='left')
-        self.blink_cursor(self.cursor_label)
         # Список компонентов
         components = [
             "Disk C:\\......... Done",
@@ -506,16 +482,15 @@ class GameApp:
             component = components[self.component_index]
             # Удаляем курсор временно
             self.cursor_label.pack_forget()
-            # Создаем или обновляем лейбл
-            if hasattr(self, 'component_label'):
-                self.component_label.destroy()
-            self.component_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
-            self.component_label.pack(anchor='w')
-            self.cursor_label.pack(side='left')
+            # Создаем лейбл
+            component_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
+            component_label.pack(anchor='w')
             # Печатаем строку компонента
             for i, char in enumerate(component):
-                self.root.after(200 * i, lambda c=char: self.component_label.config(text=self.component_label.cget("text") + c))
-            total_time = 200 * len(component)
+                self.root.after(50 * i, lambda c=char: component_label.config(text=component_label.cget("text") + c))
+            total_time = 50 * len(component)
+            # Возвращаем курсор
+            self.cursor_label.pack(side='left')
             # После печати переходим к следующему компоненту
             self.component_index += 1
             self.root.after(total_time + 500, lambda: self.display_component(components, repair_sound))
@@ -526,31 +501,97 @@ class GameApp:
             self.show_system_started()
 
     def show_system_started(self):
-        # Удаляем предыдущие лейблы
-        for widget in self.console_frame.winfo_children():
-            widget.destroy()
-        # Курсор
-        self.cursor_label = tk.Label(self.console_frame, text="_", font=("Courier", 24), fg="white", bg="black")
-        self.cursor_label.pack(side='left')
-        self.blink_cursor(self.cursor_label)
-        # Отображаем "System Started......."
+        # Удаляем курсор временно
         self.cursor_label.pack_forget()
+        # Отображаем "System Started......." белым цветом
         self.started_label = tk.Label(self.console_frame, text="", font=("Courier", 24), fg="white", bg="black")
-        self.started_label.pack(side='left')
+        self.started_label.pack(anchor='w')
         self.cursor_label.pack(side='left')
         started_text = "System Started......."
         for i, char in enumerate(started_text):
-            self.root.after(200 * i, lambda c=char: self.started_label.config(text=self.started_label.cget("text") + c))
-        total_time = 200 * len(started_text)
-        # После отображения, ждем секунду и затем черный экран
-        self.root.after(total_time + 1000, self.clear_screen)
+            self.root.after(50 * i, lambda c=char: self.started_label.config(text=self.started_label.cget("text") + c))
+        total_time = 50 * len(started_text)
+        # После отображения, ждем секунду и затем запускаем сцену с папкой
+        self.root.after(total_time + 1000, self.show_folder_scene)
 
-    def clear_screen(self):
+    def show_folder_scene(self):
+        # Очистка экрана и настройка белого фона
         for widget in self.root.winfo_children():
             widget.destroy()
-        self.root.configure(bg="black")
-        # Выход из игры или дальнейшие действия
-        self.exit_game()
+        self.root.configure(bg="white")
+
+        # Воспроизвести final_scene.mp3
+        self.final_scene_sound.play()
+
+        # Загрузка изображения папки
+        folder_image = Image.open("./data/game/folder.png")
+        folder_photo = ImageTk.PhotoImage(folder_image)
+        self.folder_label = tk.Label(self.root, image=folder_photo, bg="white")
+        self.folder_label.image = folder_photo  # Сохранение ссылки на изображение
+        self.folder_label.pack(expand=True)
+
+        # Привязка события клика на папку
+        self.folder_label.bind("<Button-1>", self.open_folder)
+
+    def open_folder(self, event):
+        # Воспроизвести звук открытия папки
+        self.open_folder_sound.play()
+
+        # Анимация открытия папки (упрощённо)
+        self.folder_label.destroy()
+
+        # Показать содержимое папки
+        self.show_secret_information()
+
+    def show_secret_information(self):
+        # Остановить звук открытия папки после полной загрузки информации
+        self.open_folder_sound.stop()
+
+        # Текст секретной информации
+        secret_text = (
+            "СЕКРЕТНАЯ ИНФОРМАЦИЯ ФБР\n\n"
+            "Компания PicLab замешана в разработке технологий\n"
+            "для скрытого наблюдения за гражданами.\n"
+            "Используя свои приложения, они собирают данные\n"
+            "о пользователях без их согласия.\n"
+            "Эта информация используется для\n"
+            "незаконного слежения и контроля.\n\n"
+            "КОНФИДЕНЦИАЛЬНО"
+        )
+
+        self.secret_label = tk.Label(self.root, text=secret_text, font=("Courier", 24), fg="black", bg="white")
+        self.secret_label.pack(pady=50)
+
+        # Загрузка изображения крестика (закрыть)
+        close_image = Image.open("./data/game/close.png")
+        close_photo = ImageTk.PhotoImage(close_image)
+        self.close_button = tk.Label(self.root, image=close_photo, bg="white")
+        self.close_button.image = close_photo  # Сохранение ссылки на изображение
+        self.close_button.place(x=self.root.winfo_screenwidth() - 50, y=10)
+
+        # Привязка события клика на крестик
+        self.close_button.bind("<Button-1>", self.close_folder)
+
+    def close_folder(self, event):
+        # Анимация закрытия папки (упрощённо)
+        self.secret_label.destroy()
+        self.close_button.destroy()
+
+        # Вернуть папку на место
+        self.show_folder_again()
+
+    def show_folder_again(self):
+        # Отображение папки снова
+        folder_image = Image.open("./data/game/folder.png")
+        folder_photo = ImageTk.PhotoImage(folder_image)
+        self.folder_label = tk.Label(self.root, image=folder_photo, bg="white")
+        self.folder_label.image = folder_photo
+        self.folder_label.pack(expand=True)
+
+        # Привязка события клика на папку
+        self.folder_label.bind("<Button-1>", self.open_folder)
+
+        # Игра не завершается, можно добавить дополнительную логику здесь
 
     def start_escape_countdown(self, event):
         if not self.escape_pressed:
