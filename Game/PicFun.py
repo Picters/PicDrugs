@@ -4,15 +4,17 @@ import sys
 # Инициализация Pygame
 pygame.init()
 
+# Получаем разрешение экрана
+infoObject = pygame.display.Info()
+screen_width = infoObject.current_w
+screen_height = infoObject.current_h
+
 # Настройки экрана
-screen_width = 800
-screen_height = 600
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.NOFRAME)  # Без рамки, чтобы занять весь экран
 pygame.display.set_caption("Моя Игра")
 
 # Загрузка ресурсов
-kira_image = pygame.image.load('./characters/Kira.png')
-jump_sound = pygame.mixer.Sound('./music/jump.mp3')
+kira_image = pygame.transform.scale(pygame.image.load('./characters/Kira.png'), (50, 50))  # Измените размер по необходимости
 background_music = pygame.mixer.Sound('./music/fun.mp3')
 background_music.play(-1)  # Циклическое воспроизведение
 
@@ -40,11 +42,15 @@ def main_menu():
         pygame.display.flip()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                game_loop()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_RETURN:  # Нажатие Enter
+                    game_loop()
 
 def game_loop():
     global kira_y, jumping, jump_count
@@ -52,8 +58,9 @@ def game_loop():
     while True:
         # Обработка событий
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                main_menu()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -64,11 +71,11 @@ def game_loop():
             kira_y -= kira_speed
         if keys[pygame.K_s]:
             kira_y += kira_speed
-        if keys[pygame.K_SPACE] and not jumping:
-            jumping = True
-            jump_sound.play()
 
         # Обработка прыжка
+        if keys[pygame.K_SPACE] and not jumping:
+            jumping = True
+
         if jumping:
             if jump_count >= -jump_height:
                 neg = 1
