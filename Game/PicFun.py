@@ -10,7 +10,7 @@ screen_width = infoObject.current_w
 screen_height = infoObject.current_h
 
 # Настройки экрана
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.NOFRAME)  # Без рамки, чтобы занять весь экран
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Моя Игра")
 
 # Загрузка ресурсов
@@ -30,30 +30,49 @@ jumping = False
 jump_height = 10
 jump_count = jump_height
 
+# Шрифт
+font = pygame.font.Font(None, 74)
+
 # Главный цикл
 def main_menu():
     while True:
         screen.fill((0, 0, 0))  # Чёрный фон
-        font = pygame.font.Font(None, 74)
+
+        # Создаем кнопки
         play_text = font.render("Играть", True, (255, 255, 255))
         exit_text = font.render("Выйти", True, (255, 255, 255))
-        screen.blit(play_text, (screen_width // 2 - play_text.get_width() // 2, screen_height // 2 - 50))
-        screen.blit(exit_text, (screen_width // 2 - exit_text.get_width() // 2, screen_height // 2 + 50))
+
+        play_button_rect = play_text.get_rect(center=(screen_width // 2, screen_height // 2 - 50))
+        exit_button_rect = exit_text.get_rect(center=(screen_width // 2, screen_height // 2 + 50))
+
+        # Отрисовываем кнопки
+        pygame.draw.rect(screen, (70, 130, 180), play_button_rect)
+        pygame.draw.rect(screen, (220, 20, 60), exit_button_rect)
+
+        screen.blit(play_text, play_button_rect)
+        screen.blit(exit_text, exit_button_rect)
+
         pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if play_button_rect.collidepoint(event.pos):
+                    game_loop()
+                elif exit_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_RETURN:  # Нажатие Enter
-                    game_loop()
 
 def game_loop():
-    global kira_y, jumping, jump_count
+    global kira_x, kira_y, jumping, jump_count
 
     while True:
         # Обработка событий
@@ -61,6 +80,10 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    main_menu()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -93,9 +116,11 @@ def game_loop():
 
         # Градиентный фон
         for i in range(screen_height):
-            color = (color1[0] * (screen_height - i) // screen_height + color2[0] * i // screen_height,
-                     color1[1] * (screen_height - i) // screen_height + color2[1] * i // screen_height,
-                     color1[2] * (screen_height - i) // screen_height + color2[2] * i // screen_height)
+            color = (
+                color1[0] * (screen_height - i) // screen_height + color2[0] * i // screen_height,
+                color1[1] * (screen_height - i) // screen_height + color2[1] * i // screen_height,
+                color1[2] * (screen_height - i) // screen_height + color2[2] * i // screen_height
+            )
             pygame.draw.line(screen, color, (0, i), (screen_width, i))
 
         # Рисуем персонажа
