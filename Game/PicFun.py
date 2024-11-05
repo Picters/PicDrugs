@@ -45,28 +45,29 @@ class Game:
         self.kira_image = pygame.transform.scale(self.kira_image_original, (150, 150))
 
         self.background_music = load_sound('./music/fun.mp3')
-        self.background_music.set_volume(0.1)  # Установить громкость фоновой музыки на 0.1
+        self.background_music.set_volume(0.1)
         self.background_music.play(-1)
 
         # Загрузка голосовых фраз
         self.voice_sounds = []
-        for i in range(1, 6):  # Удален voice6
+        for i in range(1, 6):
             voice_sound = load_sound(f'./music/voice{i}.mp3')
-            voice_sound.set_volume(1.0)  # Установить громкость на 100%
+            voice_sound.set_volume(1.0)
             self.voice_sounds.append(voice_sound)
 
         # Загрузка звука "grab"
         self.grab_sound = load_sound('./music/grab.mp3')
-        self.grab_sound.set_volume(1.0)  # Установить громкость на 100%
-        self.grab_sound_channel = None  # Канал для воспроизведения grab_sound
+        self.grab_sound.set_volume(1.0)
+        self.grab_sound_channel = None
 
         # Загрузка звука "scream"
         self.scream_sound = load_sound('./music/scream.mp3')
         self.scream_sound.set_volume(1.0)
-        self.scream_sound_channel = None  # Канал для воспроизведения scream_sound
+        self.scream_sound_channel = None
 
-        # Загрузка изображения мусорки
-        self.trash_image = load_image('./png/trash.png')
+        # Загрузка и уменьшение изображения мусорки
+        self.trash_image_original = load_image('./png/trash.png')
+        self.trash_image = pygame.transform.scale(self.trash_image_original, (50, 50))
         self.trash_rect = self.trash_image.get_rect(topright=(SCREEN_WIDTH, 0))
 
         # Персонаж
@@ -74,7 +75,7 @@ class Game:
         self.kira_speed = 5
         self.kira_vel_x = random.choice([-self.kira_speed, self.kira_speed])
         self.kira_vel_y = 0
-        self.kira_angle = 0  # Угол поворота персонажа
+        self.kira_angle = 0
         self.kira_angular_velocity = 0
         self.gravity = 0.5
         self.is_dragged = False
@@ -88,7 +89,7 @@ class Game:
         self.state = 'menu'
 
         # FPS настройки
-        self.fps = 60  # Текущий FPS
+        self.fps = 60
 
         # Цвета для градиента
         self.gradient_surface = self.create_gradient_surface(SCREEN_WIDTH, SCREEN_HEIGHT, (30, 30, 30), (70, 70, 70))
@@ -178,36 +179,27 @@ class Game:
                     self.kira_vel_x = 0
                     self.kira_vel_y = 0
                     self.kira_angular_velocity = 0
-                    # Начать воспроизведение grab.mp3 циклично
                     self.grab_sound_channel = self.grab_sound.play(-1)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.is_dragged:
                     self.is_dragged = False
-                    # Остановить воспроизведение grab.mp3
                     if self.grab_sound_channel is not None:
                         self.grab_sound_channel.stop()
                         self.grab_sound_channel = None
-                    # Проверить, отпущен ли персонаж над мусоркой
                     if self.kira_rect.colliderect(self.trash_rect):
-                        # Остановить фоновую музыку
                         self.background_music.stop()
-                        # Залить экран черным
                         SCREEN.fill((0, 0, 0))
                         pygame.display.flip()
-                        # Проиграть scream.mp3 с плавным затуханием
                         self.scream_sound_channel = self.scream_sound.play()
-                        # Плавное затухание крика
                         for volume in range(100, -1, -1):
                             self.scream_sound.set_volume(volume / 100.0)
-                            pygame.time.delay(50)  # Настроить для желаемой скорости затухания
-                        # Остановить звук
+                            pygame.time.delay(50)
                         self.scream_sound_channel.stop()
-                        pygame.time.delay(500)  # Небольшая пауза перед выходом
+                        pygame.time.delay(500)
                         pygame.quit()
                         sys.exit()
                     else:
-                        # Если не над мусоркой, продолжить обычное поведение
                         self.kira_vel_x = random.choice([-self.kira_speed, self.kira_speed])
                         self.kira_vel_y = -10
                         self.kira_angular_velocity = random.uniform(-5, 5)
@@ -219,46 +211,37 @@ class Game:
     def game_update(self):
         current_time = pygame.time.get_ticks()
         if not self.is_dragged:
-            if current_time - self.voice_timer >= 10000:  # 10 секунд
+            if current_time - self.voice_timer >= 10000:
                 self.voice_timer = current_time
                 voice_sound = random.choice(self.voice_sounds)
                 voice_sound.play()
 
         if self.is_dragged:
-            # Перетаскивание персонажа мышью с вращением
             mouse_x, mouse_y = pygame.mouse.get_pos()
             new_pos = pygame.math.Vector2(mouse_x, mouse_y) + self.mouse_offset
             self.kira_rect.center = new_pos
-            # Вращение персонажа при перетаскивании
-            self.kira_angular_velocity += 0.1  # Можно настроить чувствительность вращения
+            self.kira_angular_velocity += 0.1
             self.kira_angle += self.kira_angular_velocity
 
-            # Проверка наведения на мусорку
             if self.kira_rect.colliderect(self.trash_rect):
-                # Если scream.mp3 не воспроизводится, начать воспроизведение
                 if self.scream_sound_channel is None or not self.scream_sound_channel.get_busy():
                     self.scream_sound_channel = self.scream_sound.play(-1)
             else:
-                # Если персонаж не над мусоркой, остановить scream.mp3
                 if self.scream_sound_channel is not None and self.scream_sound_channel.get_busy():
                     self.scream_sound_channel.stop()
         else:
-            # Убедиться, что scream.mp3 остановлен, если персонаж не перетаскивается
             if self.scream_sound_channel is not None and self.scream_sound_channel.get_busy():
                 self.scream_sound_channel.stop()
 
-            # Автономное движение
             self.kira_vel_y += self.gravity
             self.kira_rect.y += self.kira_vel_y
 
             self.kira_rect.x += self.kira_vel_x
 
-            # Вращение персонажа из-за гравитации
             self.kira_angular_velocity += self.kira_vel_x * 0.01
-            self.kira_angular_velocity *= 0.99  # Сопротивление вращению
+            self.kira_angular_velocity *= 0.99
             self.kira_angle += self.kira_angular_velocity
 
-            # Изменение направления при достижении границ
             if self.kira_rect.left <= 0:
                 self.kira_rect.left = 0
                 self.kira_vel_x *= -1
@@ -272,16 +255,14 @@ class Game:
 
             if self.kira_rect.bottom >= SCREEN_HEIGHT:
                 self.kira_rect.bottom = SCREEN_HEIGHT
-                self.kira_vel_y = -self.kira_vel_y * 0.8  # Потеря энергии при отскоке
+                self.kira_vel_y = -self.kira_vel_y * 0.8
                 if abs(self.kira_vel_y) < 1:
                     self.kira_vel_y = 0
 
     def game_draw(self):
         SCREEN.blit(self.gradient_surface, (0, 0))
-        # Отрисовка мусорки
         SCREEN.blit(self.trash_image, self.trash_rect)
 
-        # Поворот персонажа
         rotated_image = pygame.transform.rotate(self.kira_image, self.kira_angle)
         new_rect = rotated_image.get_rect(center=self.kira_rect.center)
         SCREEN.blit(rotated_image, new_rect)
