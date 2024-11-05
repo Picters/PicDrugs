@@ -2,7 +2,7 @@ import pygame
 import sys
 
 # Константы
-SCREEN_TITLE = "Современная Игра"
+SCREEN_TITLE = "PicFun"
 
 # Инициализация Pygame
 pygame.init()
@@ -61,7 +61,6 @@ class Game:
         # FPS настройки
         self.fps_options = [5, 30, 60, 90, 120, 144, 180, 240, 480]
         self.fps = 60  # Текущий FPS
-        self.show_fps_menu = False  # Показывать ли выпадающее меню FPS
 
         # Цвета для градиента
         self.gradient_surface = self.create_gradient_surface(SCREEN_WIDTH, SCREEN_HEIGHT, (30, 30, 30), (70, 70, 70))
@@ -70,7 +69,6 @@ class Game:
         self.create_menu_buttons()
 
     def create_gradient_surface(self, width, height, start_color, end_color):
-        """Создает поверхность с вертикальным градиентом."""
         gradient = pygame.Surface((width, height))
         for y in range(height):
             ratio = y / height
@@ -83,17 +81,15 @@ class Game:
         return gradient
 
     def create_menu_buttons(self):
-        """Создает кнопки главного меню с современным дизайном."""
         self.play_button = pygame.Rect(0, 0, 250, 80)
         self.play_button.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100)
 
-        self.settings_button = pygame.Rect(0, 0, 300, 50)
+        self.settings_button = pygame.Rect(0, 0, 250, 80)
         self.settings_button.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20)
 
         self.exit_button = pygame.Rect(0, 0, 250, 80)
         self.exit_button.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 140)
 
-        # Шрифт для меню
         self.menu_font = pygame.font.Font(None, 60)
 
     def run(self):
@@ -101,6 +97,9 @@ class Game:
             if self.state == 'menu':
                 self.menu_events()
                 self.menu_draw()
+            elif self.state == 'settings':
+                self.settings_events()
+                self.settings_draw()
             elif self.state == 'game':
                 self.game_events()
                 self.game_update()
@@ -118,22 +117,9 @@ class Game:
                 if self.play_button.collidepoint(event.pos):
                     self.state = 'game'
                 elif self.settings_button.collidepoint(event.pos):
-                    self.show_fps_menu = not self.show_fps_menu
+                    self.state = 'settings'
                 elif self.exit_button.collidepoint(event.pos):
                     self.running = False
-                elif self.show_fps_menu:
-                    # Проверяем, на какую опцию FPS нажал пользователь
-                    for idx, option in enumerate(self.fps_options):
-                        option_rect = pygame.Rect(
-                            self.settings_button.left,
-                            self.settings_button.bottom + idx * 40,
-                            self.settings_button.width,
-                            40
-                        )
-                        if option_rect.collidepoint(event.pos):
-                            self.fps = option
-                            self.show_fps_menu = False
-                            break
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -142,18 +128,16 @@ class Game:
     def menu_draw(self):
         SCREEN.blit(self.gradient_surface, (0, 0))
 
-        # Отрисовка заголовка игры
-        title_text = self.font.render("Моя Современная Игра", True, (200, 200, 200))
+        title_text = self.font.render("PicFun", True, (200, 200, 200))
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 250))
         SCREEN.blit(title_text, title_rect)
 
-        # Отрисовка кнопок
         pygame.draw.rect(SCREEN, (50, 150, 200), self.play_button, border_radius=15)
-        pygame.draw.rect(SCREEN, (50, 50, 50), self.settings_button, border_radius=10)
+        pygame.draw.rect(SCREEN, (50, 50, 50), self.settings_button, border_radius=15)
         pygame.draw.rect(SCREEN, (200, 50, 50), self.exit_button, border_radius=15)
 
         play_text = self.menu_font.render("Играть", True, (255, 255, 255))
-        settings_text = self.menu_font.render(f"Кадры в секунду - {self.fps}", True, (255, 255, 255))
+        settings_text = self.menu_font.render("Настройки", True, (255, 255, 255))
         exit_text = self.menu_font.render("Выйти", True, (255, 255, 255))
 
         play_text_rect = play_text.get_rect(center=self.play_button.center)
@@ -164,19 +148,58 @@ class Game:
         SCREEN.blit(settings_text, settings_text_rect)
         SCREEN.blit(exit_text, exit_text_rect)
 
-        # Отрисовка выпадающего меню FPS
-        if self.show_fps_menu:
-            for idx, option in enumerate(self.fps_options):
-                option_rect = pygame.Rect(
-                    self.settings_button.left,
-                    self.settings_button.bottom + idx * 40,
-                    self.settings_button.width,
-                    40
-                )
-                pygame.draw.rect(SCREEN, (70, 70, 70), option_rect)
-                fps_option_text = self.menu_font.render(f"{option}", True, (255, 255, 255))
-                fps_option_rect = fps_option_text.get_rect(center=option_rect.center)
-                SCREEN.blit(fps_option_text, fps_option_rect)
+        pygame.display.flip()
+
+    def settings_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for idx, option in enumerate(self.fps_options):
+                    option_rect = pygame.Rect(
+                        SCREEN_WIDTH // 2 - 150,
+                        150 + idx * 50,
+                        300,
+                        40
+                    )
+                    if option_rect.collidepoint(event.pos):
+                        self.fps = option
+                        break
+                back_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 100, 200, 50)
+                if back_button_rect.collidepoint(event.pos):
+                    self.state = 'menu'
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.state = 'menu'
+
+    def settings_draw(self):
+        SCREEN.blit(self.gradient_surface, (0, 0))
+
+        settings_title = self.font.render("Настройки", True, (200, 200, 200))
+        settings_title_rect = settings_title.get_rect(center=(SCREEN_WIDTH // 2, 50))
+        SCREEN.blit(settings_title, settings_title_rect)
+
+        for idx, option in enumerate(self.fps_options):
+            option_rect = pygame.Rect(
+                SCREEN_WIDTH // 2 - 150,
+                150 + idx * 50,
+                300,
+                40
+            )
+            pygame.draw.rect(SCREEN, (70, 70, 70), option_rect)
+            fps_option_text = self.menu_font.render(f"{option} FPS", True, (255, 255, 255))
+            fps_option_rect = fps_option_text.get_rect(center=option_rect.center)
+            SCREEN.blit(fps_option_text, fps_option_rect)
+            if self.fps == option:
+                pygame.draw.rect(SCREEN, (255, 255, 0), option_rect, 3)
+
+        back_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 100, 200, 50)
+        pygame.draw.rect(SCREEN, (50, 150, 200), back_button_rect, border_radius=15)
+        back_text = self.menu_font.render("Назад", True, (255, 255, 255))
+        back_text_rect = back_text.get_rect(center=back_button_rect.center)
+        SCREEN.blit(back_text, back_text_rect)
 
         pygame.display.flip()
 
@@ -194,13 +217,11 @@ class Game:
                     self.kira_vel_y = -10
 
     def game_update(self):
-        # Обновление позиции персонажа
         if self.keys[pygame.K_a]:
             self.kira_rect.x -= self.kira_speed
         if self.keys[pygame.K_d]:
             self.kira_rect.x += self.kira_speed
 
-        # Обработка прыжка и гравитации
         self.kira_vel_y += self.gravity
         self.kira_rect.y += self.kira_vel_y
 
@@ -209,7 +230,6 @@ class Game:
             self.is_jumping = False
             self.kira_vel_y = 0
 
-        # Ограничение перемещения персонажа по границам экрана
         if self.kira_rect.left < 0:
             self.kira_rect.left = 0
         if self.kira_rect.right > SCREEN_WIDTH:
