@@ -1,6 +1,8 @@
 import pygame
 import sys
 import random
+import os
+import sys
 
 # Константы
 SCREEN_TITLE = "PicFun"
@@ -17,10 +19,19 @@ SCREEN_HEIGHT = infoObject.current_h
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption(SCREEN_TITLE)
 
+# Функция для получения пути к ресурсам
+def resource_path(relative_path):
+    """Получает абсолютный путь к ресурсу, учитывая, работает ли программа в режиме .exe."""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 # Загрузка ресурсов с проверкой ошибок
 def load_image(path):
     try:
-        image = pygame.image.load(path).convert_alpha()
+        image = pygame.image.load(resource_path(path)).convert_alpha()
         return image
     except pygame.error as e:
         print(f"Не удалось загрузить изображение: {path}")
@@ -28,7 +39,7 @@ def load_image(path):
 
 def load_sound(path):
     try:
-        sound = pygame.mixer.Sound(path)
+        sound = pygame.mixer.Sound(resource_path(path))
         return sound
     except pygame.error as e:
         print(f"Не удалось загрузить звук: {path}")
@@ -40,34 +51,34 @@ class Game:
         self.font = pygame.font.Font(None, 74)
 
         # Загрузка ресурсов
-        self.kira_image_original = load_image('./characters/Kira.png')
+        self.kira_image_original = load_image('Kira.png')
         self.kira_image = pygame.transform.scale(self.kira_image_original, (150, 150))
 
         # Увеличиваем размер henrybaby в два раза
-        self.henrybaby_image_original = load_image('./characters/henrybaby.png')
+        self.henrybaby_image_original = load_image('henrybaby.png')
         self.henrybaby_image = pygame.transform.scale(self.henrybaby_image_original, (60, 60))  # Размер 60x60 пикселей
 
-        self.background_music = load_sound('./music/fun.mp3')
+        self.background_music = load_sound('fun.mp3')
         self.background_music.set_volume(0.1)
         self.background_music.play(-1)
 
         # Загрузка звуков
-        self.grab_sound = load_sound('./music/grab.mp3')
+        self.grab_sound = load_sound('grab.mp3')
         self.grab_sound.set_volume(1.0)
 
-        self.scream_sound = load_sound('./music/scream.mp3')
+        self.scream_sound = load_sound('scream.mp3')
         self.scream_sound.set_volume(1.0)
 
         # Загрузка голосовых фраз
         self.voice_sounds = []
         for i in range(1, 6):
-            voice_sound = load_sound(f'./music/voice{i}.mp3')
+            voice_sound = load_sound(f'voice{i}.mp3')
             voice_sound.set_volume(1.0)
             self.voice_sounds.append(voice_sound)
 
         # Загрузка и уменьшение изображения мусорки
-        self.trash_image_original = load_image('./png/trash.png')
-        self.trash_image = pygame.transform.scale(self.trash_image_original, (50, 50))
+        self.trash_image_original = load_image('trash.png')
+        self.trash_image = pygame.transform.scale(self.trash_image_original, (30, 30))  # Уменьшаем размер до 30x30 пикселей
         self.trash_rect = self.trash_image.get_rect(topright=(SCREEN_WIDTH, 0))
 
         # Персонаж
