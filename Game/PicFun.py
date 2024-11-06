@@ -181,11 +181,12 @@ class Game:
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.kira_rect.collidepoint(event.pos):
-                    self.is_dragged = True
-                    self.mouse_offset = pygame.math.Vector2(self.kira_rect.center) - pygame.math.Vector2(event.pos)
-                    self.kira_vel_x = 0
-                    self.kira_vel_y = 0
-                    self.grab_channel.play(self.grab_sound, loops=-1)
+                    if not self.grinder_visible:
+                        self.is_dragged = True
+                        self.mouse_offset = pygame.math.Vector2(self.kira_rect.center) - pygame.math.Vector2(event.pos)
+                        self.kira_vel_x = 0
+                        self.kira_vel_y = 0
+                        self.grab_channel.play(self.grab_sound, loops=-1)
                 elif self.arrow_rect.collidepoint(event.pos):
                     self.toggle_panel()
                 elif self.panel_open:
@@ -212,7 +213,8 @@ class Game:
                         self.kira_vel_x = delta.x * 0.2
                         self.kira_vel_y = delta.y * 0.2
                     self.prev_mouse_pos = None
-                    if self.grinder_visible and self.kira_rect.colliderect(self.trash_rect):
+                    if self.kira_rect.colliderect(self.trash_rect):
+                        self.scream_channel.play(self.scream_sound)
                         self.background_music.stop()
                         self.voice_channel.stop()
                         self.grab_channel.stop()
@@ -227,7 +229,6 @@ class Game:
                             pygame.display.flip()
                             pygame.time.delay(30)
                         pygame.mixer.stop()
-                        self.scream_channel.play(self.scream_sound)
                         for volume in range(100, -1, -1):
                             self.scream_channel.set_volume(volume / 100.0)
                             pygame.time.delay(50)
@@ -320,24 +321,24 @@ class Game:
                 self.arrow_rect.x -= min(self.panel_animation_speed, current_x - target_x)
     
     def game_draw(self):
-        SCREEN.blit(Game.gradient_surface, (0, 0))
-        SCREEN.blit(Game.trash_image, Game.trash_rect)
-        SCREEN.blit(Game.kira_image, Game.kira_rect)
-        Game.panel_surface.fill((0, 0, 0, 0))
-        pygame.draw.rect(Game.panel_surface, Game.panel_color, (0, 0, Game.panel_width, Game.panel_height), border_radius=20)
-        Game.panel_surface.blit(Game.panel_title, Game.panel_title_rect)
-        pygame.draw.rect(Game.panel_surface, Game.rubka_square_color, Game.rubka_square_rect)
-        if Game.grinder_visible:
-            pygame.draw.rect(Game.panel_surface, (0, 0, 255), Game.rubka_square_rect, 3)
+        SCREEN.blit(self.gradient_surface, (0, 0))
+        SCREEN.blit(self.trash_image, self.trash_rect)
+        SCREEN.blit(self.kira_image, self.kira_rect)
+        self.panel_surface.fill((0, 0, 0, 0))
+        pygame.draw.rect(self.panel_surface, self.panel_color, (0, 0, self.panel_width, self.panel_height), border_radius=20)
+        self.panel_surface.blit(self.panel_title, self.panel_title_rect)
+        pygame.draw.rect(self.panel_surface, self.rubka_square_color, self.rubka_square_rect)
+        if self.grinder_visible:
+            pygame.draw.rect(self.panel_surface, (0, 0, 255), self.rubka_square_rect, 3)
         else:
-            pygame.draw.rect(Game.panel_surface, (0, 0, 0), Game.rubka_square_rect, 3)
-        rubka_x = Game.rubka_square_rect.left + (Game.rubka_square_rect.width - Game.rubka_image.get_width()) // 2
-        rubka_y = Game.rubka_square_rect.top + (Game.rubka_square_rect.height - Game.rubka_image.get_height()) // 2
-        Game.panel_surface.blit(Game.rubka_image, (rubka_x, rubka_y))
-        if Game.grinder_visible:
-            SCREEN.blit(Game.grinder_image, Game.grinder_rect)
-        SCREEN.blit(Game.panel_surface, Game.panel_rect)
-        SCREEN.blit(Game.arrow_image, Game.arrow_rect)
+            pygame.draw.rect(self.panel_surface, (0, 0, 0), self.rubka_square_rect, 3)
+        rubka_x = self.rubka_square_rect.left + (self.rubka_square_rect.width - self.rubka_image.get_width()) // 2
+        rubka_y = self.rubka_square_rect.top + (self.rubka_square_rect.height - self.rubka_image.get_height()) // 2
+        self.panel_surface.blit(self.rubka_image, (rubka_x, rubka_y))
+        if self.grinder_visible:
+            SCREEN.blit(self.grinder_image, self.grinder_rect)
+        SCREEN.blit(self.panel_surface, self.panel_rect)
+        SCREEN.blit(self.arrow_image, self.arrow_rect)
         pygame.display.flip()
 
 if __name__ == "__main__":
