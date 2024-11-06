@@ -7,8 +7,8 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('Kira.png', '.'),  # Добавляем файл Kira.png в корень
-        ('henrybaby.png', '.'),  # Добавляем файл henrybaby.png в корень
+        ('Kira.png', '.'),
+        ('henrybaby.png', '.'),
         ('fun.mp3', '.'),
         ('grab.mp3', '.'),
         ('scream.mp3', '.'),
@@ -17,7 +17,7 @@ a = Analysis(
         ('voice3.mp3', '.'),
         ('voice4.mp3', '.'),
         ('voice5.mp3', '.'),
-        ('trash.png', '.'),  # Добавляем файл trash.png в корень
+        ('trash.png', '.'),
     ],
     hiddenimports=[],
     hookspath=[],
