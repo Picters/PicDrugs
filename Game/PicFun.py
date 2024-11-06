@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 import os
-import sys
 
 # Константы
 SCREEN_TITLE = "PicFun"
@@ -54,9 +53,9 @@ class Game:
         self.kira_image_original = load_image('Kira.png')
         self.kira_image = pygame.transform.scale(self.kira_image_original, (150, 150))
 
-        # Увеличиваем размер henrybaby в два раза
-        self.henrybaby_image_original = load_image('henrybaby.png')
-        self.henrybaby_image = pygame.transform.scale(self.henrybaby_image_original, (60, 60))  # Размер 60x60 пикселей
+        # Удалено: Загрузка и масштабирование henrybaby.png
+        # self.henrybaby_image_original = load_image('henrybaby.png')
+        # self.henrybaby_image = pygame.transform.scale(self.henrybaby_image_original, (60, 60))  # Размер 60x60 пикселей
 
         self.background_music = load_sound('fun.mp3')
         self.background_music.set_volume(0.1)
@@ -107,11 +106,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.state = 'menu'
 
-        # Список для henrybaby
-        self.henrybabies = []
+        # Удалено: Список для henrybaby
+        # self.henrybabies = []
 
-        # Флаг для генерации henrybaby бесконечно
-        self.spawn_henrybabies = False
+        # Удалено: Флаг для генерации henrybaby бесконечно
+        # self.spawn_henrybabies = False
 
         # Цвета для градиента
         self.gradient_surface = self.create_gradient_surface(SCREEN_WIDTH, SCREEN_HEIGHT, (30, 30, 30), (70, 70, 70))
@@ -122,9 +121,9 @@ class Game:
         # Создаем кнопки главного меню
         self.create_menu_buttons()
 
-        # Красная кнопка
-        self.red_button = pygame.Rect(10, 10, 20, 20)
-        self.red_button_visible = False  # Флаг видимости красной кнопки
+        # Удалено: Красная кнопка
+        # self.red_button = pygame.Rect(10, 10, 20, 20)
+        # self.red_button_visible = False  # Флаг видимости красной кнопки
 
     def create_gradient_surface(self, width, height, start_color, end_color):
         gradient = pygame.Surface((width, height))
@@ -168,7 +167,8 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.play_button.collidepoint(event.pos):
                     self.state = 'game'
-                    self.red_button_visible = True  # Делаем красную кнопку видимой
+                    # Удалено: Сделать красную кнопку видимой
+                    # self.red_button_visible = True
                 elif self.exit_button.collidepoint(event.pos):
                     self.running = False
 
@@ -196,13 +196,14 @@ class Game:
 
         pygame.display.flip()
 
-    def trigger_henrybabies(self):
-        self.background_music.stop()  # Остановить фоновую музыку
-        self.scream_channel.play(self.scream_sound)  # Проиграть scream.mp3
-        self.spawn_henrybabies = True  # Начать бесконечное появление henrybabies
+    # Удалена функция trigger_henrybabies, так как henrybaby больше не используется
+    # def trigger_henrybabies(self):
+    #     self.background_music.stop()  # Остановить фоновую музыку
+    #     self.scream_channel.play(self.scream_sound)  # Проиграть scream.mp3
+    #     self.spawn_henrybabies = True  # Начать бесконечное появление henrybabies
 
-        # Ждем 2 секунды и затем выходим из игры
-        pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
+    #     # Ждем 2 секунды и затем выходим из игры
+    #     pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
 
     def game_events(self):
         for event in pygame.event.get():
@@ -222,8 +223,9 @@ class Game:
                     self.kira_vel_x = 0
                     self.kira_vel_y = 0
                     self.grab_channel.play(self.grab_sound, loops=-1)
-                elif self.red_button_visible and self.red_button.collidepoint(event.pos):
-                    self.trigger_henrybabies()  # Обработка нажатия на красную кнопку
+                # Удалено: Обработка нажатия на красную кнопку
+                # elif self.red_button_visible and self.red_button.collidepoint(event.pos):
+                #     self.trigger_henrybabies()  # Обработка нажатия на красную кнопку
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.is_dragged:
@@ -267,7 +269,8 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.state = 'menu'
-                    self.red_button_visible = False  # Скрываем красную кнопку при возвращении в меню
+                    # Удалено: Скрываем красную кнопку при возвращении в меню
+                    # self.red_button_visible = False
 
     def game_update(self):
         current_time = pygame.time.get_ticks()
@@ -280,19 +283,19 @@ class Game:
             if self.scream_channel.get_busy():
                 self.scream_channel.stop()
 
-        # Генерация henrybaby бесконечно
-        if self.spawn_henrybabies:
-            # Создаем нескольких henrybaby каждый кадр
-            for _ in range(5):
-                henry_rect = self.henrybaby_image.get_rect(center=(random.randint(0, SCREEN_WIDTH), 0))
-                self.henrybabies.append(henry_rect)
+        # Удалено: Генерация henrybaby бесконечно
+        # if self.spawn_henrybabies:
+        #     # Создаем нескольких henrybaby каждый кадр
+        #     for _ in range(5):
+        #         henry_rect = self.henrybaby_image.get_rect(center=(random.randint(0, SCREEN_WIDTH), 0))
+        #         self.henrybabies.append(henry_rect)
 
-        # Обновление позиции henrybaby
-        for henry_rect in self.henrybabies:
-            henry_rect.y += 2  # Движение вниз
+        # Удалено: Обновление позиции henrybaby
+        # for henry_rect in self.henrybabies:
+        #     henry_rect.y += 2  # Движение вниз
 
-        # Удаляем henrybaby, которые вышли за пределы экрана
-        self.henrybabies = [henry_rect for henry_rect in self.henrybabies if henry_rect.y < SCREEN_HEIGHT]
+        # Удалено: Удаление henrybaby, которые вышли за пределы экрана
+        # self.henrybabies = [henry_rect for henry_rect in self.henrybabies if henry_rect.y < SCREEN_HEIGHT]
 
         if current_time - self.voice_timer >= 10000:
             self.voice_timer = current_time
@@ -344,13 +347,13 @@ class Game:
         SCREEN.blit(self.trash_image, self.trash_rect)
         SCREEN.blit(self.kira_image, self.kira_rect)
 
-        # Отрисовка henrybaby
-        for henry_rect in self.henrybabies:
-            SCREEN.blit(self.henrybaby_image, henry_rect)
+        # Удалена: Отрисовка henrybaby
+        # for henry_rect in self.henrybabies:
+        #     SCREEN.blit(self.henrybaby_image, henry_rect)
 
-        # Рисуем красную кнопку, если она видима
-        if self.red_button_visible:
-            pygame.draw.rect(SCREEN, (255, 0, 0), self.red_button)
+        # Удалено: Рисуем красную кнопку, если она видима
+        # if self.red_button_visible:
+        #     pygame.draw.rect(SCREEN, (255, 0, 0), self.red_button)
 
         pygame.display.flip()
 
