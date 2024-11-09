@@ -1,14 +1,57 @@
 import pygame
 import sys
 import os
+import random
+import math
 
 # Инициализация Pygame
 pygame.init()
 
-# Размеры окна
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Демонстрация эффектов наркотических веществ на зрение")
+# Получение разрешения экрана и установка полноэкранного режима
+infoObject = pygame.display.Info()
+WIDTH, HEIGHT = infoObject.current_w, infoObject.current_h
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+pygame.display.set_caption("PicDrugs")
+
+# Цвета
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+PURPLE = (128, 0, 128)
+ORANGE = (255, 165, 0)
+CYAN = (0, 255, 255)
+
+# Часы для контроля FPS
+clock = pygame.time.Clock()
+FPS = 60
+
+# Шрифты
+font_size_title = int(HEIGHT * 0.1)  # Размер шрифта для заставки
+font_title = pygame.font.SysFont(None, font_size_title)
+font_size_info = int(HEIGHT * 0.025)  # Размер шрифта для информации
+font = pygame.font.SysFont(None, font_size_info)
+
+# Функция для отображения текста
+def draw_text(text, font, color, surface, x, y, align="center"):
+    textobj = font.render(text, True, color)
+    textrect = textobj.get_rect()
+    if align == "center":
+        textrect.center = (x, y)
+    elif align == "topleft":
+        textrect.topleft = (x, y)
+    elif align == "topright":
+        textrect.topright = (x, y)
+    surface.blit(textobj, textrect)
+
+# Функция для отображения заставки
+def splash_screen():
+    screen.fill(BLACK)
+    draw_text("PicDrugs", font_title, WHITE, screen, WIDTH // 2, HEIGHT // 2, align="center")
+    pygame.display.flip()
+    pygame.time.delay(3000)  # Задержка 3 секунды
 
 # Загрузка изображения фона
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), 'assets')
@@ -22,93 +65,157 @@ except pygame.error as e:
     pygame.quit()
     sys.exit()
 
-# Цвета
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
-# Часы для контроля FPS
-clock = pygame.time.Clock()
-FPS = 60
-
-# Функция для отображения текста
-def draw_text(text, font, color, surface, x, y):
-    textobj = font.render(text, True, color)
-    textrect = textobj.get_rect(center=(x, y))
-    surface.blit(textobj, textrect)
-
 # Класс для эффектов
 class Effect:
-    def __init__(self, name, duration, effect_func):
+    def __init__(self, name, effect_func):
         self.name = name
-        self.duration = duration
         self.effect_func = effect_func
 
 # Эффект кокаина
 def cocaine_effect(screen, intensity):
-    # Мигание между красным и синим
-    if intensity % 10 < 5:
-        overlay_color = (255, 0, 0)  # Красный
-    else:
-        overlay_color = (0, 0, 255)  # Синий
-    overlay = pygame.Surface((WIDTH, HEIGHT))
-    overlay.set_alpha(100)
-    overlay.fill(overlay_color)
+    # Резкие мигания между красным и синим
+    overlay_color = RED if random.randint(0, 1) else BLUE
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((*overlay_color, 100))
     screen.blit(overlay, (0, 0))
-    
-    # Дрожание
-    shake_offset = 5
-    dx = (pygame.time.get_ticks() % (2 * shake_offset)) - shake_offset
-    dy = (pygame.time.get_ticks() % (2 * shake_offset)) - shake_offset
-    temp_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    temp_surface.fill((255, 255, 255, 0))
-    font = pygame.font.SysFont(None, 36)
-    draw_text("Эффект кокаина: Изменение зрения", font, BLACK, temp_surface, WIDTH // 2 + dx, HEIGHT // 2 + dy)
-    screen.blit(temp_surface, (dx, dy))
+
+    # Резкое дрожание
+    shake_amplitude = 15
+    dx = random.randint(-shake_amplitude, shake_amplitude)
+    dy = random.randint(-shake_amplitude, shake_amplitude)
+    screen.blit(background_image, (dx, dy))
 
 # Эффект марихуаны
 def weed_effect(screen, intensity):
-    # Добавление зеленого тона и легкое дрожание
-    overlay_color = (0, 255, 0)  # Зеленый
-    overlay = pygame.Surface((WIDTH, HEIGHT))
-    overlay.set_alpha(50)
-    overlay.fill(overlay_color)
+    # Зеленый тон с плавными изменениями
+    overlay_color = GREEN
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    alpha_variation = random.randint(-10, 10)
+    alpha = max(0, min(255, 70 + alpha_variation))  # Небольшие колебания альфа
+    overlay.fill((*overlay_color, alpha))
     screen.blit(overlay, (0, 0))
-    
-    # Легкое дрожание
-    shake_offset = 2
-    dx = (pygame.time.get_ticks() % (2 * shake_offset)) - shake_offset
-    dy = (pygame.time.get_ticks() % (2 * shake_offset)) - shake_offset
-    temp_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    temp_surface.fill((255, 255, 255, 0))
-    font = pygame.font.SysFont(None, 36)
-    draw_text("Эффект марихуаны: Изменение восприятия", font, BLACK, temp_surface, WIDTH // 2 + dx, HEIGHT // 2 + dy)
-    screen.blit(temp_surface, (dx, dy))
+
+    # Плавное дрожание
+    shake_amplitude = 5
+    shake_frequency = 120
+    dx = int(shake_amplitude * math.sin((intensity / shake_frequency) * math.pi * 2))
+    dy = int(shake_amplitude * math.sin((intensity / shake_frequency) * math.pi * 2))
+    screen.blit(background_image, (dx, dy))
 
 # Эффект ЛСД
 def lsd_effect(screen, intensity):
-    # Изменение цветов и абстрактные узоры
-    for i in range(0, WIDTH, 50):
-        for j in range(0, HEIGHT, 50):
-            color = ((i + intensity) % 255, (j + intensity) % 255, (i + j) % 255)
-            pygame.draw.rect(screen, color, (i, j, 50, 50))
-    
-    # Добавление текста
-    font = pygame.font.SysFont(None, 36)
-    draw_text("Эффект ЛСД: Галлюцинации и искажения", font, BLACK, screen, WIDTH // 2, HEIGHT // 2)
+    # Резкие цветовые изменения
+    shift_r = random.randint(-30, 30)
+    shift_g = random.randint(-15, 15)
+    shift_b = random.randint(-30, 30)
+
+    # Создание цветового сдвига
+    colored_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    for x in range(0, WIDTH, 20):
+        for y in range(0, HEIGHT, 20):
+            try:
+                r, g, b = background_image.get_at((x, y))[:3]
+            except IndexError:
+                r, g, b = 0, 0, 0
+            r = max(0, min(255, r + shift_r))
+            g = max(0, min(255, g + shift_g))
+            b = max(0, min(255, b + shift_b))
+            pygame.draw.rect(colored_overlay, (r, g, b, 50), (x, y, 20, 20))
+    screen.blit(colored_overlay, (0, 0))
+
+    # Абстрактные узоры
+    pattern_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    for _ in range(30):
+        radius = random.randint(5, 20)
+        color = (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255), 100)
+        pos = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        pygame.draw.circle(pattern_surface, color, pos, radius)
+    screen.blit(pattern_surface, (0, 0))
+
+    # Резкое дрожание
+    shake_amplitude = 10
+    dx = random.randint(-shake_amplitude, shake_amplitude)
+    dy = random.randint(-shake_amplitude, shake_amplitude)
+    screen.blit(background_image, (dx, dy))
+
+# Эффект экстази (MDMA)
+def ecstasy_effect(screen, intensity):
+    # Яркие мигания с разными цветами
+    colors = [YELLOW, PURPLE, CYAN, ORANGE]
+    overlay_color = random.choice(colors)
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((*overlay_color, 120))
+    screen.blit(overlay, (0, 0))
+
+    # Пульсирующее мерцание
+    pulse = int(50 * math.sin(intensity / 30))
+    shake_amplitude = 10
+    dx = shake_amplitude * math.sin((intensity / 60) * math.pi * 2) + pulse
+    dy = shake_amplitude * math.sin((intensity / 60) * math.pi * 2) + pulse
+    dx = int(dx)
+    dy = int(dy)
+    screen.blit(background_image, (dx, dy))
+
+# Эффект метамфетамина
+def methamphetamine_effect(screen, intensity):
+    # Интенсивный красный оверлей с бликами
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((*RED, 150))
+    screen.blit(overlay, (0, 0))
+
+    # Быстрое дрожание
+    shake_amplitude = 20
+    dx = random.randint(-shake_amplitude, shake_amplitude)
+    dy = random.randint(-shake_amplitude, shake_amplitude)
+    screen.blit(background_image, (dx, dy))
+
+    # Добавление бликов
+    for _ in range(50):
+        radius = random.randint(1, 3)
+        color = (255, 255, 255, random.randint(50, 150))
+        pos = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        pygame.draw.circle(screen, color, pos, radius)
+
+# Эффект героина
+def heroin_effect(screen, intensity):
+    # Темный, мутный оверлей с размытием
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((50, 50, 50, 180))
+    screen.blit(overlay, (0, 0))
+
+    # Медленное дрожание
+    shake_amplitude = 8
+    shake_frequency = 80
+    dx = int(shake_amplitude * math.sin((intensity / shake_frequency) * math.pi * 2))
+    dy = int(shake_amplitude * math.sin((intensity / shake_frequency) * math.pi * 2))
+    screen.blit(background_image, (dx, dy))
+
+    # Добавление мягкого свечения
+    glow = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    for _ in range(100):
+        radius = random.randint(2, 5)
+        color = (200, 200, 200, 30)
+        pos = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        pygame.draw.circle(glow, color, pos, radius)
+    screen.blit(glow, (0, 0))
 
 # Список доступных эффектов
 effects = {
     "Нормальное зрение": None,
-    "Кокаин": Effect("Кокаин", 300, cocaine_effect),
-    "Марихуана": Effect("Марихуана", 300, weed_effect),
-    "ЛСД": Effect("ЛСД", 300, lsd_effect),
+    "Кокаин": Effect("Кокаин", cocaine_effect),
+    "Марихуана": Effect("Марихуана", weed_effect),
+    "ЛСД": Effect("ЛСД", lsd_effect),
+    "Экстази": Effect("Экстази", ecstasy_effect),
+    "Метамфетамин": Effect("Метамфетамин", methamphetamine_effect),
+    "Героин": Effect("Героин", heroin_effect),
 }
 
 # Основной цикл приложения
 def main():
-    font = pygame.font.SysFont(None, 36)
+    splash_screen()
     active_effect = None
-    effect_timer = 0
+    current_effect_name = "Нормальное зрение"
+    intensity = 0  # Для плавных эффектов
 
     while True:
         for event in pygame.event.get():
@@ -117,35 +224,60 @@ def main():
                 sys.exit()
             # Обработка нажатий клавиш для выбора эффекта
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                elif event.key == pygame.K_1:
                     active_effect = effects["Кокаин"]
-                    effect_timer = active_effect.duration if active_effect else 0
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
                 elif event.key == pygame.K_2:
                     active_effect = effects["Марихуана"]
-                    effect_timer = active_effect.duration if active_effect else 0
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
                 elif event.key == pygame.K_3:
                     active_effect = effects["ЛСД"]
-                    effect_timer = active_effect.duration if active_effect else 0
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
+                elif event.key == pygame.K_4:
+                    active_effect = effects["Экстази"]
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
+                elif event.key == pygame.K_5:
+                    active_effect = effects["Метамфетамин"]
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
+                elif event.key == pygame.K_6:
+                    active_effect = effects["Героин"]
+                    current_effect_name = active_effect.name if active_effect else "Нормальное зрение"
                 elif event.key == pygame.K_0:
                     active_effect = effects["Нормальное зрение"]
-                    effect_timer = 0
+                    current_effect_name = "Нормальное зрение"
 
         # Отображение изображения фона
         screen.blit(background_image, (0, 0))
 
         # Применение активного эффекта
-        if active_effect and effect_timer > 0:
-            active_effect.effect_func(screen, effect_timer)
-            effect_timer -= 1
-            if effect_timer <= 0:
-                active_effect = None
+        if active_effect:
+            active_effect.effect_func(screen, intensity)
+            intensity += 1  # Увеличение интенсивности для анимации
         else:
-            # Отображение статичного текста выбора
-            draw_text("Выберите эффект:", font, BLACK, screen, WIDTH // 2, HEIGHT // 2 - 100)
-            draw_text("1: Кокаин", font, BLACK, screen, WIDTH // 2, HEIGHT // 2 - 50)
-            draw_text("2: Марихуана", font, BLACK, screen, WIDTH // 2, HEIGHT // 2)
-            draw_text("3: ЛСД", font, BLACK, screen, WIDTH // 2, HEIGHT // 2 + 50)
-            draw_text("0: Нормальное зрение", font, BLACK, screen, WIDTH // 2, HEIGHT // 2 + 100)
+            intensity = 0  # Сброс интенсивности
+
+        # Отображение списка клавиш и их назначений (верхний левый угол)
+        key_list = [
+            "1: Кокаин",
+            "2: Марихуана",
+            "3: ЛСД",
+            "4: Экстази",
+            "5: Метамфетамин",
+            "6: Героин",
+            "0: Нормальное зрение",
+            "Esc: Выход"
+        ]
+        for idx, key in enumerate(key_list):
+            draw_text(key, font, BLACK, screen, 20, 20 + idx * (font_size_info + 5), align="topleft")
+
+        # Отображение текущего эффекта (верхний правый угол)
+        draw_text(f"Текущий эффект: {current_effect_name}", font, BLACK, screen, WIDTH - 20, 20, align="topright")
+
+        # Отображение версии приложения (нижний левый угол)
+        draw_text("Версия 1.5", font, BLACK, screen, 20, HEIGHT - 20, align="topleft")
 
         # Обновление экрана
         pygame.display.flip()
